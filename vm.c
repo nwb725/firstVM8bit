@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "vm.h"
 
 // 'regs' is the array of registers i will have 4 registers.
@@ -18,7 +19,9 @@ __uint8_t fetch_instr() {
 
 // Dynamically allocates memory for a decoded instruction.
 void* allocate_decoded_instruction() {
-    return malloc(sizeof(struct d_instr));
+    struct d_instr* d = malloc(sizeof(struct d_instr));
+    assert(d != NULL);
+    return d;
 }
 
 // Print an 8bit instruction
@@ -47,6 +50,7 @@ struct d_instr* decode(__uint8_t instr) {
 
 
 int main() {
-    print_8bit_instr((__uint8_t)0xa4);
+    struct d_instr* d = decode(0xFF);
+    free(d);
     return 0;
 }
