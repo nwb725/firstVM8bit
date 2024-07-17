@@ -1,14 +1,19 @@
 #ifndef VM_H
+#define VM_H
+
+#include <stdint.h>
 
 // r1 to r4 are the 4 general purpose registers, and r0 is zero.
 #define NUM_REGS 5
+#define RUNNING 0
+#define HALT 1
 
 // A struct for a decoded instruction.
 struct d_instr {
-    int upcode;
-    int r1;
-    int r2;
-    int rst2;
+    uint8_t upcode;
+    uint8_t upcode2;
+    uint8_t r1;
+    uint8_t rst2;
 };
 
 
