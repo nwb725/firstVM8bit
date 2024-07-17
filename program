@@ -1,3 +1,0 @@
-ADD r1 r2
-ADDI r3 23
-HLT

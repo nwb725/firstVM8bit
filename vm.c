@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "vm.h"
 #include "memory.h"
+#include "map_instructions.h"
 
 // 'regs' is the array of registers i will have 5 registers.
 uint8_t regs[NUM_REGS];
@@ -189,7 +190,9 @@ void run_program() {
     }
 }
 
-int main(int argc, char **argv) {
-    run_program();
+int main() {
+    // run_program();
+    read_program_file();
+    print_instr_split();
     return 0;
 }
