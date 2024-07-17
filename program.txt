@@ -1,2 +1,2 @@
-ADD r1 rst2
+ADD r1 r2
 HLT

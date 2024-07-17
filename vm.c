@@ -191,7 +191,6 @@ void run_program() {
 }
 
 int main() {
-    // run_program();
     read_program_file();
     print_instr_split();
     return 0;

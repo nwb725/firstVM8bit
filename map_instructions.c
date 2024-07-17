@@ -5,6 +5,7 @@
 #include <string.h>
 #include "vm.h"
 #include "map_instructions.h"
+#include "map_helpers.h"
 
 // ADD r1 r2
 // ADDI r3 23
@@ -59,13 +60,14 @@ void read_program_file() {
 
     fclose(prg_stream);
 }
-void generate_split_instr() {
 
-
-}
-
-void sepperate_instructions() {
+struct instr_to_8bit* sepperate_instructions() {
     int num_instructions = count_instructions(PROGRAM_PATH);
+    if (num_instructions <= 0) {
+        printf("Number of instructions is less then or equal 0: %d", num_instructions);
+        exit(EXIT_FAILURE);
+    }
+
     char* temp[num_instructions];
 
     // Gets the first instruction.
@@ -73,14 +75,43 @@ void sepperate_instructions() {
 
     // Loads every instruction after the first into temp
     for (int i = 1; i < num_instructions; i++) {
-        temp[1] = strtok(NULL, "\n");
+        temp[i] = strtok(NULL, "\n");
     }
 
     // The HLT instruction matches on "HLT" and "HLT\0" 
     // But not on "HLT\n" or "HLT ".
-    if (!strcmp(temp[0], "ADD r1 rst2")) {
-        printf("yeah\n");
+
+    // Create an instr_args struct with the name
+    // And get the 4bit upcodes and number of args.
+    // Loop through all the sepperated instructions
+    for (int i = 0; i < num_instructions-1; i++) {
+        char* r = malloc(5+1);
+        r[0] = "\0";
+        struct instr_args* iargs = malloc(sizeof(struct instr_args));
+        iargs->name = strtok(temp[i], " ");
+        struct instr_args* curr = get_upcodes(iargs);
+        for (int j = 0; j < curr->num_args; j++) {
+            char* temp1 = strtok(NULL, " ");
+            temp1 = get_regs(temp1);
+            printf("%s\n", r);
+            strcat(r, temp1);
+        }
+        //printf("%s\n", r);
+        //printf("Name: %s, Num args: %d, Upcodes: %s.\n",curr->name, curr->num_args, curr->upcodes_4b);
+        free(iargs);
     }
+
+    
+
+    /* char* t  = strtok(temp[0], " ");
+    char* t2 = strtok(NULL, " ");
+    char* t3 = strtok(NULL, " ");
+    char* t4 = strtok(NULL, "\0");
+    printf("%s\n", t);
+    printf("%s\n", t2);
+    printf("%s\n", t3); */
+    //printf("%s\n", t4);
+    return NULL;
 }
 
 void print_instr_split() {

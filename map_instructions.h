@@ -3,10 +3,11 @@
 
 #define PROGRAM_PATH "../firstVM8bit/program.txt"
 
-struct instr_split {
+struct instr_to_8bit {
     char name;
     char r1;
     char rst2;
+    char full_8bit_instr;
 };
 
 void print_instr_split();
