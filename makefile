@@ -3,7 +3,7 @@ CFLAGS=-Wall -Wextra -pedantic -std=c11
 all: vm
 
 vm: vm.o memory.o map_instructions.o map_helpers.o
-	gcc vm.o memory.o map_instructions.o map_helpers.o -o vm $(CFLAGS)
+	gcc vm.o memory.o map_instructions.o map_helpers.o -o vm $(CFLAGS) -lm
 
 vm.o: vm.c
 	gcc -c vm.c -o vm.o $(CFLAGS)

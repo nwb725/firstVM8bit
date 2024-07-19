@@ -198,7 +198,6 @@ void run_program() {
 }
 
 int main() {
-    read_program_file();
-    print_instr_split();
-    return 0;
+     // uint8_t* pro = get_program();
+     return 0;
 }

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "vm.h"
 #include "map_instructions.h"
 #include "map_helpers.h"
@@ -18,7 +19,7 @@
 
 char instrs[255];
 
-char** p;
+uint8_t* p;
 
 int count_instructions(const char *fp) {
     FILE *file = fopen(fp, "r");
@@ -63,7 +64,58 @@ void read_program_file() {
     fclose(prg_stream);
 }
 
-void sepperate_instructions(char** r) {
+uint8_t binary_to_hex_8b(struct instr_to_8bit* in) {
+
+    // First part here is just copying an concatting the 2 bits for rst2 onto r1.
+    size_t reg_length = strlen(in->r1) + strlen(in->rst2) + 1;
+    size_t name_length = strlen(in->name) + 1;
+
+    char* reg_combined = (char *)malloc(reg_length);
+    if (reg_combined == NULL) {
+        printf("Failed to allocate memory");
+        exit(EXIT_FAILURE);
+    }
+
+    strcpy(reg_combined, in->r1);
+    strcat(reg_combined, in->rst2);
+
+    // Now we loop over the string and see if it is 1 then +=i^2.
+    uint8_t reg_val = 0;
+    uint8_t name_val = 0;
+    int inc = -1;
+
+    //printf("%ld\n", name_length);
+    // First name:
+    for (int i = name_length-1; i > -1; i--) {
+        if (in->name[i] == '1') {
+            name_val += (uint8_t)pow(2, inc);
+            // printf("INC: %d\n", inc);
+        }
+        inc++;
+    }
+    // printf("Name value: %d\n", name_val);
+
+    inc = -1;
+
+    // Now regs:
+    for (int i = reg_length-1; i > -1; i--) {
+        if (reg_combined[i] == '1') {
+            reg_val += (uint8_t)pow(2, inc);
+        }
+        inc++;
+    } 
+
+    // To get the number hehe...
+    // Since name (upcode 1 and 2) are the 4 most significant bits
+    // we multiply by 16, since it is base 16.
+    // Then add the register bits to it.
+    name_val *= 16;
+    name_val += reg_val;
+    return name_val;
+}
+
+
+void sepperate_instructions(uint8_t* r) {
     int num_instructions = count_instructions(PROGRAM_PATH);
     if (num_instructions <= 0) {
         printf("Number of instructions is less then or equal 0: %d", num_instructions);
@@ -74,7 +126,6 @@ void sepperate_instructions(char** r) {
 
     // Gets the first instruction.
     temp[0] = strtok(instrs, "\n");
-
     // Loads every instruction after the first into temp
     for (int i = 1; i < num_instructions; i++) {
         temp[i] = strtok(NULL, "\n");
@@ -131,27 +182,9 @@ void sepperate_instructions(char** r) {
             printf("Error in mapping arguments to binary.");
             break;
         }
-
-
-        // Gets the string length of all components.
-        // The allocate room in a new variable called 'combined'
-        // String copy and concat the components to the combined.
-        // Add it to r[i] as the 8bit of the current instruction.
-        size_t total_length = strlen(res->name) + strlen(res->r1) + strlen(res->rst2) + 1;
-
-        char* combined = (char *)malloc(total_length);
-        if (combined == NULL) {
-            printf("Failed to allocate memory");
-            exit(EXIT_FAILURE);
-        }
-
-        strcpy(combined, res->name);
-        strcat(combined, res->r1);
-        strcat(combined, res->rst2);
-
-        r[i] = combined;
-
-        free(combined);
+        printf("Full instrs: %s %s%s\n", res->name, res->r1, res->rst2);
+        uint8_t int_val = binary_to_hex_8b(res);
+        r[i] = int_val;
         free(res);
         free(iargs);
     }
@@ -162,10 +195,12 @@ void print_instr_split() {
     printf("%s\n", instrs);
 }
 
-void get_program() {
-    p = malloc(sizeof(char*) * count_instructions(PROGRAM_PATH));
+
+// Needs to return something good?? Segfaults.
+uint8_t* get_program() {
+    p = malloc(sizeof(uint8_t) * count_instructions(PROGRAM_PATH));
     sepperate_instructions(p);
-    free(p);
+    return p;
 }
 
 

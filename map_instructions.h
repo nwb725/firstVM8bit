@@ -10,7 +10,9 @@ struct instr_to_8bit {
     char* rst2;
 };
 
+
 void print_instr_split();
 void read_program_file();
+uint8_t* get_program();
 
 #endif // MEMORY_H
