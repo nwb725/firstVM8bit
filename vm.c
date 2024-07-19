@@ -21,6 +21,13 @@ int running = RUNNING;
 // A temporary variable.
 int temp;
 
+// Sets all register values to 0.
+void init_regs() {
+    for (int i = 0; i<NUM_REGS; i++) {
+        regs[i] = 0;
+    }
+}
+
 // Fetches the next instruction and increments the program counter.
 uint8_t fetch_instr() {
     if (pc == 254) {

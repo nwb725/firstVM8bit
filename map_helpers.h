@@ -7,7 +7,7 @@ struct instr_args {
     int num_args;
 };
 
-struct instr_args* get_upcodes(struct instr_args* iargs);
+void get_upcodes(struct instr_args* iargs);
 char* get_regs(char* instr);
 
 #endif // MEMORY_H

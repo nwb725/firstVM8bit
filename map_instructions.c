@@ -18,6 +18,8 @@
 
 char instrs[255];
 
+char** p;
+
 int count_instructions(const char *fp) {
     FILE *file = fopen(fp, "r");
     if (file == NULL) {
@@ -48,7 +50,7 @@ void read_program_file() {
     // Opens the file for reading
     FILE* prg_stream = fopen(PROGRAM_PATH, "r");
     if (prg_stream == NULL) {
-        perror("Error opening file");
+        printf("Error opening file");
         exit(EXIT_FAILURE);
     }
 
@@ -61,7 +63,7 @@ void read_program_file() {
     fclose(prg_stream);
 }
 
-struct instr_to_8bit* sepperate_instructions() {
+void sepperate_instructions(char** r) {
     int num_instructions = count_instructions(PROGRAM_PATH);
     if (num_instructions <= 0) {
         printf("Number of instructions is less then or equal 0: %d", num_instructions);
@@ -81,42 +83,89 @@ struct instr_to_8bit* sepperate_instructions() {
     // The HLT instruction matches on "HLT" and "HLT\0" 
     // But not on "HLT\n" or "HLT ".
 
-    // Create an instr_args struct with the name
-    // And get the 4bit upcodes and number of args.
-    // Loop through all the sepperated instructions
-    for (int i = 0; i < num_instructions-1; i++) {
-        char* r = malloc(5+1);
-        r[0] = "\0";
+    // NEEDS EXPLANATION!
+    for (int i = 0; i < num_instructions; i++) {
+
+        // Holds the binary sequences of an instruction.
+        // Name: Binary representation of the name (Upcode 1 and 2).
+        // R1: binary representation of the first register input.
+        // Rst2: binary representation of the second input (register/immidiate).
+        struct instr_to_8bit* res = malloc(sizeof(struct instr_to_8bit));
+
+        // Holds the current instructions 'iargs':
+        // Name: Name of instruction as char*.
+        // Upcodes_4b: Upcode1 and 2 as a char*.
+        // Num_args: Number of arguments for the current instruction.
         struct instr_args* iargs = malloc(sizeof(struct instr_args));
+
+        // Gets upcode 1 and 2 that matches the name of the instruction.
+        // Saves it in iargs.
         iargs->name = strtok(temp[i], " ");
-        struct instr_args* curr = get_upcodes(iargs);
-        for (int j = 0; j < curr->num_args; j++) {
-            char* temp1 = strtok(NULL, " ");
-            temp1 = get_regs(temp1);
-            printf("%s\n", r);
-            strcat(r, temp1);
+        get_upcodes(iargs);
+
+
+        switch (iargs->num_args) {
+        // Only HLT has 0 args.
+        case 0:
+            res->name = iargs->upcodes_4b;
+            res->r1 = DEFAULT_REG_VAL;
+            res->rst2 = DEFAULT_REG_VAL;
+            break;
+        case 1:
+            res->name = iargs->upcodes_4b;
+
+            char* t = strtok(NULL, " ");
+            res->r1 = get_regs(t);
+            res->rst2 = DEFAULT_REG_VAL;
+            break;
+        case 2:
+            res->name = iargs->upcodes_4b;
+
+            char* t1 = strtok(NULL, " ");
+            res->r1 = get_regs(t1);
+
+            char* t2 = strtok(NULL, " ");
+            res->rst2 = get_regs(t2);
+            break;
+        default:
+            printf("Error in mapping arguments to binary.");
+            break;
         }
-        //printf("%s\n", r);
-        //printf("Name: %s, Num args: %d, Upcodes: %s.\n",curr->name, curr->num_args, curr->upcodes_4b);
+
+
+        // Gets the string length of all components.
+        // The allocate room in a new variable called 'combined'
+        // String copy and concat the components to the combined.
+        // Add it to r[i] as the 8bit of the current instruction.
+        size_t total_length = strlen(res->name) + strlen(res->r1) + strlen(res->rst2) + 1;
+
+        char* combined = (char *)malloc(total_length);
+        if (combined == NULL) {
+            printf("Failed to allocate memory");
+            exit(EXIT_FAILURE);
+        }
+
+        strcpy(combined, res->name);
+        strcat(combined, res->r1);
+        strcat(combined, res->rst2);
+
+        r[i] = combined;
+
+        free(combined);
+        free(res);
         free(iargs);
     }
 
-    
-
-    /* char* t  = strtok(temp[0], " ");
-    char* t2 = strtok(NULL, " ");
-    char* t3 = strtok(NULL, " ");
-    char* t4 = strtok(NULL, "\0");
-    printf("%s\n", t);
-    printf("%s\n", t2);
-    printf("%s\n", t3); */
-    //printf("%s\n", t4);
-    return NULL;
 }
 
 void print_instr_split() {
-    sepperate_instructions();
-    //printf("%s\n", instrs);
+    printf("%s\n", instrs);
+}
+
+void get_program() {
+    p = malloc(sizeof(char*) * count_instructions(PROGRAM_PATH));
+    sepperate_instructions(p);
+    free(p);
 }
 
 

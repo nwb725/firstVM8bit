@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 // r1 to r4 are the 4 general purpose registers, and r0 is zero.
-#define NUM_REGS 5
+#define NUM_REGS 4
 #define RUNNING 0
 #define HALT 1
 
