@@ -6,6 +6,7 @@
 #define PROGRAM_PATH "../firstVM8bit/program.txt"
 #define DEFAULT_REG_VAL "00"
 #define OUTPUT_FILE "program_assemble.txt"
+#define MAX_INSTRUCTIONS 192
 
 struct instr_to_8bit {
     char* name;

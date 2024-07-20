@@ -7,6 +7,7 @@
 #define NUM_REGS 4
 #define RUNNING 0
 #define HALT 1
+#define PROG_START_ADDR 64
 
 // A struct for a decoded instruction.
 struct d_instr {

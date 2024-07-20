@@ -6,39 +6,48 @@
 #include "memory.h"
 #include "assembler.h"
 
-// 'regs' is the array of registers i will have 5 registers.
+// 'regs' is the array of registers i will have 4 registers.
+// r0 - Is always 0.
+// r1, r2 and r3 - General purpose registers.
 uint8_t regs[NUM_REGS];
 
-// The program counter.
-int pc = 0;
+// The program counter, starts at 64 always.
+// The last 192 bytes in memory are reserved for instructions.
+int pc = PROG_START_ADDR;
 
-// The running flag, is only set to 1 if HLT is executed.
+// The running flag, is only set to HALT if HLT is executed.
+// Where the machine then halts.
 int running = RUNNING;
 
-// A temporary variable.
+// A temporary variable...
 int temp;
 
-// Sets all register values to 0.
+/// @brief Initializes all register values to 0.
 void init_regs() {
     for (int i = 0; i<NUM_REGS; i++) {
         regs[i] = 0;
     }
 }
 
+/// @brief Prints the values in each register
 void print_regs() {
     for (int i = 0; i <NUM_REGS; i++) {
         printf("REG[%d] = %d\n", i, regs[i]);
     }
 }
 
-// Dynamically allocates memory for a decoded instruction.
+/// @brief Dynamically allocates memory for a decoded instruction.
+/// @return Returns a pointer the the decoded instruction.
 void* allocate_decoded_instruction() {
     struct d_instr* d = malloc(sizeof(struct d_instr));
     assert(d != NULL);
     return d;
 }
 
-// Print an 8bit instruction
+
+/// @brief Print an 8bit instruction. 
+/// Takes a uint8_t and prints 8bits -> '0000 0000'.
+/// @param instr The instruction to print.
 void print_8bit_instr(uint8_t instr) {
     for (int i = 7; i >= 0; i--) {
         if (i == 3) {
@@ -49,12 +58,18 @@ void print_8bit_instr(uint8_t instr) {
     printf("\n");
 }
 
-// Assume we have 8 bits 0000 0000
-// The first 2 are the upcode
-// the second 2 are the second upcode
-// the third 2 are the r1 
-// and the last 2 are r2/imm/addr.
+
+/// @brief Takes and instruction and decodes it.
+/// @param instr The instruction to decode.
+/// @return Returns a pointer the the decoded instruction.
 struct d_instr* decode(uint8_t instr) {
+
+    // Assume we have 8 bits 0000 0000
+    // The first 2 are the upcode
+    // the second 2 are the second upcode
+    // the third 2 are for the register
+    // and the last 2 are r2/imm/addr.
+
     struct d_instr* de = allocate_decoded_instruction();
     de->upcode   = (instr >> 6);
     de->upcode2  = (instr >> 4) & 0x3;
@@ -64,12 +79,14 @@ struct d_instr* decode(uint8_t instr) {
 }
 
 
+/// @brief The function for executing instructions.
+/// It fetches the next instruction, matches the upcode,
+/// and executes it. Then updates the program counter.
 void execute_instructions() {
     uint8_t curr_instr = fetch_instr(pc);
     struct d_instr* d_curr_instr = decode(curr_instr);
     int r1 = d_curr_instr->r1;
     int rst2 = d_curr_instr->rst2;
-    printf("CUUR NAME: %d\n", curr_instr);
 
     switch (d_curr_instr->upcode) {
     // Data movement - upcode '00'
@@ -145,9 +162,11 @@ void execute_instructions() {
     case 0x3:
         switch (d_curr_instr->upcode2) {
         // JMP - Jumps to address r1 + rst2 lets say: xxxx 0110, then 'JMP 6'
+        // Might need to rethink the logic here...
         case 0x0:
             // Keeps only the last 4 bits for jumping addr.
             temp = (curr_instr & 0xF);
+            printf("JMP - Jumping to: %d\n", temp);
             pc = temp;
             break;
         // JMPZ - Jumps to addr rst2 only if value in r1 is zero.
@@ -176,23 +195,38 @@ void execute_instructions() {
 
 
     default:
-        printf("Default case for 'upcode', should never land here.");
+        printf("Default case for 'upcode', should never land here.\n");
+        printf("The current last instruction was: %d", curr_instr);
         break;
     }
     free(d_curr_instr);
     pc++;
 }
 
+
+/// @brief Runs the program, only stops when the HALT flag is set.
 void run_program() {
     while (running != HALT) {
         execute_instructions();
     }
 }
 
+// First it assembles the program.txt file
+// Then it writes it to memory
+// The registers are then initialized to 0.
+// Then the program is run untill the HALT flag is set.
+// At last the register values are printed. Mostly for debugging.
+
+/// @brief 
+/// First it assembles the program.txt file
+/// Then it writes it to memory
+/// The registers are then initialized to 0.
+/// Then the program is run untill the HALT flag is set.
+/// At last the register values are printed, Mostly for debugging.
+/// @return Returns 0 on success.
 int main() {
     get_program();
     init_regs();
     run_program();
-    print_regs();
     return 0;
 }

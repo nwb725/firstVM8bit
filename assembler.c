@@ -18,10 +18,15 @@
 // Map the instruction name and registers/immidiates to hex.
 // Returns a program of 8bit instructions for 'prog[]' in VM.
 
-char instrs[255];
+/// @brief A buffer for the instructions that are read from program.txt.
+char instrs[MAX_INSTRUCTIONS];
 
+/// @brief This points to a list that holds all uint8_t values for all instructions.
 uint8_t* p;
 
+/// @brief Counts the number of instructions in a program.
+/// @param fp The program file.
+/// @return Returns the number of instructions.
 int count_instructions(const char *fp) {
     FILE *file = fopen(fp, "r");
     if (file == NULL) {
@@ -44,11 +49,11 @@ int count_instructions(const char *fp) {
     }
 
     fclose(file);
-    printf("LINES: %d\n", lines);
     return lines;
 
 }
 
+/// @brief Reads the program into the buffer (instrs).
 void read_program_file() {
     // Opens the file for reading
     FILE* prg_stream = fopen(PROGRAM_PATH, "r");
@@ -66,7 +71,10 @@ void read_program_file() {
     fclose(prg_stream);
 }
 
-uint8_t binary_to_hex_8b(struct instr_to_8bit* in) {
+/// @brief 
+/// @param in 
+/// @return 
+uint8_t instr_to_uint_8b(struct instr_to_8bit* in) {
 
     // First part here is just copying an concatting the 2 bits for rst2 onto r1.
     size_t reg_length = strlen(in->r1) + strlen(in->rst2) + 1;
@@ -86,16 +94,13 @@ uint8_t binary_to_hex_8b(struct instr_to_8bit* in) {
     uint8_t name_val = 0;
     int inc = -1;
 
-    //printf("%ld\n", name_length);
     // First name:
     for (int i = name_length-1; i > -1; i--) {
         if (in->name[i] == '1') {
             name_val += (uint8_t)pow(2, inc);
-            // printf("INC: %d\n", inc);
         }
         inc++;
     }
-    // printf("Name value: %d\n", name_val);
 
     inc = -1;
 
@@ -116,11 +121,12 @@ uint8_t binary_to_hex_8b(struct instr_to_8bit* in) {
     return name_val;
 }
 
-
-void sepperate_instructions(uint8_t* r) {
+/// @brief Sepperates each instruction by: NAME R1 RST2, so that they can me mapped.
+/// Then uses instr_to_uint_8b to convert the split instruction into a uint.
+void sepperate_instructions() {
     int num_instructions = count_instructions(PROGRAM_PATH);
     if (num_instructions <= 0) {
-        printf("Number of instructions is less then or equal 0: %d", num_instructions);
+        printf("Number of instructions is less then or equal 0: %d\n", num_instructions);
         exit(EXIT_FAILURE);
     }
 
@@ -132,9 +138,6 @@ void sepperate_instructions(uint8_t* r) {
     for (int i = 1; i < num_instructions; i++) {
         temp[i] = strtok(NULL, "\n");
     }
-
-    // The HLT instruction matches on "HLT" and "HLT\0" 
-    // But not on "HLT\n" or "HLT ".
 
     // NEEDS EXPLANATION!
     for (int i = 0; i < num_instructions; i++) {
@@ -155,7 +158,6 @@ void sepperate_instructions(uint8_t* r) {
         // Saves it in iargs.
         iargs->name = strtok(temp[i], " ");
         get_upcodes(iargs);
-        printf("HEJJ\n");
 
         switch (iargs->num_args) {
         // Only HLT has 0 args.
@@ -181,27 +183,36 @@ void sepperate_instructions(uint8_t* r) {
             res->rst2 = get_regs(t2);
             break;
         default:
-            printf("Error in mapping arguments to binary.");
+            printf("Error in mapping arguments to binary.\n");
             break;
         }
-        printf("Full instrs: %s %s%s\n", res->name, res->r1, res->rst2);
-        uint8_t int_val = binary_to_hex_8b(res);
-        r[i] = int_val;
+
+        // Gets the integer value of the instruction
+        // and stores it in p.
+        uint8_t int_val = instr_to_uint_8b(res);
+        p[i] = int_val;
         free(res);
         free(iargs);
     }
 
 }
 
+/// @brief Prints all instructions as strings.
 void print_instr_split() {
     printf("%s\n", instrs);
 }
 
 
-// Initializes memory and writes the program instructions
-// as hex to memory.
+// Initializes memory and 
+// writes the program instructions as uints to memory.
+// The first 64 bytes are free
+// the last 192 bytes are reserved for instructions
+
+/// @brief Initializes memory, reads and parses the program
+/// and writes the program to memory.
 void get_program() {
     int cnt = count_instructions(PROGRAM_PATH);
+
 
     init_memory();
     read_program_file();
@@ -211,10 +222,10 @@ void get_program() {
     sepperate_instructions(p);
 
     for (int i = 0; i < cnt; i++) {
-        write_memory(i, p[i]);
+        write_memory(PROG_START_ADDR + i, p[i]);
     }
 
-    print_memory();
+    // print_memory();
 
     free(p);
 }

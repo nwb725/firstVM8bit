@@ -4,9 +4,11 @@
 #include <string.h>
 #include "assembler_utils.h"
 
+/// @brief Gets called in the assembler, maps the name of an instruction
+/// to a given upcode 1 and 2 - and the number of arguments for that instruction.
+/// @param iargs A pointer to the current instruction, contains only name.
 void get_upcodes(struct instr_args* iargs) {
     char* instr = iargs->name;
-    printf("INSTR: %s\n", instr);
 
     if (strcmp(instr, "LDI") == 0) {
         iargs->upcodes_4b = "0000";
@@ -80,14 +82,20 @@ void get_upcodes(struct instr_args* iargs) {
     } */
 }
 
+/// @brief Maps the register name to a given hex value.
+/// @param reg The register name to map. 
+/// @return Returns a hex value that matches the register name.
 char* get_regs(char* reg) {
     if (strcmp(reg, "r0") == 0) {
         return "00";
-    } else if (strcmp(reg, "r1") == 0) {
+    } 
+    if (strcmp(reg, "r1") == 0) {
         return "01";
-    } else if (strcmp(reg, "r2") == 0) {
+    } 
+    if (strcmp(reg, "r2") == 0) {
         return "10";
-    } else if (strcmp(reg, "r3") == 0) {
+    } 
+    if (strcmp(reg, "r3") == 0) {
         return "11";
     } else {
         printf("Unknown register: %s\n", reg);
