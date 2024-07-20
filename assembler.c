@@ -4,9 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "vm.h"
-#include "map_instructions.h"
-#include "map_helpers.h"
+#include "cpu.h"
+#include "memory.h"
+#include "assembler.h"
+#include "assembler_utils.h"
 
 // ADD r1 r2
 // ADDI r3 23
@@ -43,6 +44,7 @@ int count_instructions(const char *fp) {
     }
 
     fclose(file);
+    printf("LINES: %d\n", lines);
     return lines;
 
 }
@@ -153,7 +155,7 @@ void sepperate_instructions(uint8_t* r) {
         // Saves it in iargs.
         iargs->name = strtok(temp[i], " ");
         get_upcodes(iargs);
-
+        printf("HEJJ\n");
 
         switch (iargs->num_args) {
         // Only HLT has 0 args.
@@ -196,11 +198,25 @@ void print_instr_split() {
 }
 
 
-// Needs to return something good?? Segfaults.
-uint8_t* get_program() {
-    p = malloc(sizeof(uint8_t) * count_instructions(PROGRAM_PATH));
+// Initializes memory and writes the program instructions
+// as hex to memory.
+void get_program() {
+    int cnt = count_instructions(PROGRAM_PATH);
+
+    init_memory();
+    read_program_file();
+
+
+    p = malloc(sizeof(uint8_t) * cnt);
     sepperate_instructions(p);
-    return p;
+
+    for (int i = 0; i < cnt; i++) {
+        write_memory(i, p[i]);
+    }
+
+    print_memory();
+
+    free(p);
 }
 
 

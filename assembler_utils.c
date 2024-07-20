@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "map_helpers.h"
+#include "assembler_utils.h"
 
 void get_upcodes(struct instr_args* iargs) {
     char* instr = iargs->name;
+    printf("INSTR: %s\n", instr);
 
     if (strcmp(instr, "LDI") == 0) {
         iargs->upcodes_4b = "0000";
@@ -23,7 +24,6 @@ void get_upcodes(struct instr_args* iargs) {
         iargs->upcodes_4b = "0011";
         iargs->num_args = 2;
     }
-
     if (strcmp(instr, "ADD") == 0) {
         iargs->upcodes_4b = "0100";
         iargs->num_args = 2;

@@ -1,5 +1,5 @@
-#ifndef MAP_HELPERS_H
-#define MAP_HELPERS_H
+#ifndef ASSEMBLER_UTILS_H
+#define ASSEMBLER_UTILS_H
 
 struct instr_args {
     char* name;

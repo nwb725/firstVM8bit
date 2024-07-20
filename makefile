@@ -2,20 +2,20 @@ CFLAGS=-Wall -Wextra -pedantic -std=c11
 
 all: vm
 
-vm: vm.o memory.o map_instructions.o map_helpers.o
-	gcc vm.o memory.o map_instructions.o map_helpers.o -o vm $(CFLAGS) -lm
+vm: cpu.o memory.o assembler.o assembler_utils.o
+	gcc cpu.o memory.o assembler.o assembler_utils.o -o vm $(CFLAGS) -lm
 
-vm.o: vm.c
-	gcc -c vm.c -o vm.o $(CFLAGS)
+cpu.o: cpu.c
+	gcc -c cpu.c -o cpu.o $(CFLAGS)
 
 memory.o: memory.c
 	gcc -c memory.c -o memory.o $(CFLAGS)
 
-map_instructions.o: map_instructions.c
-	gcc -c map_instructions.c -o map_instructions.o $(CFLAGS)
+assembler.o: assembler.c
+	gcc -c assembler.c -o assembler.o $(CFLAGS)
 
-map_helpers.o: map_helpers.c
-	gcc -c map_helpers.c -o map_helpers.o $(CFLAGS)
+assembler_utils.o: assembler_utils.c
+	gcc -c assembler_utils.c -o assembler_utils.o $(CFLAGS)
 
 clean:
 	rm -f *.o vm

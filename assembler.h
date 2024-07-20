@@ -1,8 +1,11 @@
-#ifndef MAP_INSTRUCTIONS_H
-#define MAP_INSTRUCTIONS_H
+#ifndef ASSEMBLER_H
+#define ASSEMBLER_H
+
+#include <stdint.h>
 
 #define PROGRAM_PATH "../firstVM8bit/program.txt"
 #define DEFAULT_REG_VAL "00"
+#define OUTPUT_FILE "program_assemble.txt"
 
 struct instr_to_8bit {
     char* name;
@@ -13,6 +16,6 @@ struct instr_to_8bit {
 
 void print_instr_split();
 void read_program_file();
-uint8_t* get_program();
+void get_program();
 
-#endif // MEMORY_H
+#endif

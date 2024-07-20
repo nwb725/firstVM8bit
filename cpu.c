@@ -2,15 +2,12 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
-#include "vm.h"
+#include "cpu.h"
 #include "memory.h"
-#include "map_instructions.h"
+#include "assembler.h"
 
 // 'regs' is the array of registers i will have 5 registers.
 uint8_t regs[NUM_REGS];
-
-// 'prog' is a list of instructions.
-uint8_t prog[] = {0};
 
 // The program counter.
 int pc = 0;
@@ -28,16 +25,10 @@ void init_regs() {
     }
 }
 
-// Fetches the next instruction and increments the program counter.
-uint8_t fetch_instr() {
-    if (pc == 254) {
-        printf("%s", "Last instruction to execute, instruction 254.");
+void print_regs() {
+    for (int i = 0; i <NUM_REGS; i++) {
+        printf("REG[%d] = %d\n", i, regs[i]);
     }
-    if (pc > 254) {
-        printf("%s", "Program counter exceded 254 which is the max number of instructions, an error has ocurred.");
-        return 1;
-    }
-    return prog[pc++];
 }
 
 // Dynamically allocates memory for a decoded instruction.
@@ -74,11 +65,11 @@ struct d_instr* decode(uint8_t instr) {
 
 
 void execute_instructions() {
-    uint8_t curr_instr = fetch_instr();
+    uint8_t curr_instr = fetch_instr(pc);
     struct d_instr* d_curr_instr = decode(curr_instr);
     int r1 = d_curr_instr->r1;
     int rst2 = d_curr_instr->rst2;
-
+    printf("CUUR NAME: %d\n", curr_instr);
 
     switch (d_curr_instr->upcode) {
     // Data movement - upcode '00'
@@ -189,15 +180,19 @@ void execute_instructions() {
         break;
     }
     free(d_curr_instr);
+    pc++;
 }
 
 void run_program() {
-    while (running == RUNNING) {
+    while (running != HALT) {
         execute_instructions();
     }
 }
 
 int main() {
-     // uint8_t* pro = get_program();
-     return 0;
+    get_program();
+    init_regs();
+    run_program();
+    print_regs();
+    return 0;
 }

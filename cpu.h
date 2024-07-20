@@ -1,5 +1,5 @@
-#ifndef VM_H
-#define VM_H
+#ifndef CPU_H
+#define CPU_H
 
 #include <stdint.h>
 

@@ -1,7 +1,7 @@
-#include "memory.h"
 #include <stdint.h>
 #include <assert.h>
 #include <stdio.h>
+#include "memory.h"
 
 uint8_t memory[MEMORY_SIZE];
 
@@ -10,6 +10,14 @@ void init_memory() {
     for (int i=0; i < MEMORY_SIZE; i++) {
         memory[i] = 0;
     }
+}
+
+uint8_t fetch_instr(int pc) {
+    if (pc > MEMORY_SIZE) {
+        printf("%s", "Program counter exceded 254 which is the max number of instructions, an error has ocurred.");
+        return 1;
+    }
+    return memory[pc];
 }
 
 
