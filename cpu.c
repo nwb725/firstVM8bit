@@ -94,18 +94,22 @@ void execute_instructions() {
         switch (d_curr_instr->upcode2) {
         // LDI - Load immidiate rst2 into r1.
         case 0x0:
+            printf("LDI r%d %d\n", r1, rst2);
             regs[r1] = rst2;
             break;
         // LD - Load value from addr[rst2] into r1
         case 0x1:
+            printf("LD r%d r%d\n", r1, rst2);
             regs[r1] = read_memory(rst2);
             break;
         // ST - Store value from r1 into addr in rst2
         case 0x2:
+            printf("ST r%d r%d\n", r1, rst2);
             write_memory(rst2, r1);
             break;
         // MOV - Moves value from rst2 into r1.
         case 0x3:
+            printf("MOV r%d r%d\n", r1, rst2);
             regs[r1] = regs[rst2];
             break;
         default:
@@ -117,18 +121,22 @@ void execute_instructions() {
         switch (d_curr_instr->upcode2) {
         // ADD - Add values in r1 with rst2, and stores in r1.
         case 0x0:
+            printf("ADD r%d r%d\n", r1, rst2);
             regs[r1] += regs[rst2];
             break;
         // SUB - Subtract values in r1 with rst2, and stores in r1.
         case 0x1:
+            printf("SUB r%d r%d\n", r1, rst2);
             regs[r1] -= regs[rst2];
             break;
         // MUL - Multiply values in r1 with rst2, and stores in r1.
         case 0x2:
+            printf("MUL r%d r%d\n", r1, rst2);
             regs[r1] *= regs[rst2];
             break;
         // ADDI - Add value in r1 with immidiate value in rst2, and stores in r1. 
         case 0x3:
+            printf("ADDI r%d %d\n", r1, rst2);
             regs[r1] += rst2;
             break;
         default:
@@ -140,18 +148,22 @@ void execute_instructions() {
         switch (d_curr_instr->upcode2) {
         // AND - bitwise ANDs values in register r1 and rst2 and stores in r1.
         case 0x0:
+            printf("AND r%d r%d\n", r1, rst2);
             regs[r1] &= regs[rst2];
             break;
         // OR - bitwise ORs values in register r1 and rst2 and stores in r1.
         case 0x1:
+            printf("OR r%d r%d\n", r1, rst2);
             regs[r1] |= regs[rst2];
             break;
         // XOR - bitwise XORs values in register r1 and rst2 and stores in r1.
         case 0x2:
+            printf("XOR r%d r%d\n", r1, rst2);
             regs[r1] ^= regs[rst2];
             break;
         // NOT - bitwise NOT value in r1 and stores in rst2. 
         case 0x3:
+            printf("NOT r%d r%d\n", r1, rst2);
             regs[rst2] = ~regs[r1];
             break;
         default:
@@ -164,20 +176,21 @@ void execute_instructions() {
         // JMP - Jumps to address r1 + rst2 lets say: xxxx 0110, then 'JMP 6'
         // Might need to rethink the logic here...
         case 0x0:
+            printf("JMP r%d r%d\n", r1, rst2);
             // Keeps only the last 4 bits for jumping addr.
             temp = (curr_instr & 0xF);
-            printf("JMP - Jumping to: %d\n", temp);
             pc = temp;
             break;
         // JMPZ - Jumps to addr rst2 only if value in r1 is zero.
         case 0x1:
+            printf("JMPZ r%d r%d", r1, rst2);
             if (regs[r1] == 0) {
-                printf("JMPZ - Jumping to: %d\n", regs[rst2]);
                 pc = regs[rst2];
             }
             break;
         // JMPNZ - Jumps to addr rst2 only if value in r1 is NOT zero.
         case 0x2:
+            printf("JMPNZ r%d r%d\n", r1, rst2);
             if (regs[r1] != 0) {
                 printf("JMPNZ - Jumping to: %d\n", regs[rst2]);
                 pc = regs[rst2];

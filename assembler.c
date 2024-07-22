@@ -9,14 +9,6 @@
 #include "assembler.h"
 #include "assembler_utils.h"
 
-// ADD r1 r2
-// ADDI r3 23
-// HLT
-
-// Read from the .txt file.
-// Create a list of instructions that end an '\n'.
-// Map the instruction name and registers/immidiates to hex.
-// Returns a program of 8bit instructions for 'prog[]' in VM.
 
 /// @brief A buffer for the instructions that are read from program.txt.
 char instrs[MAX_INSTRUCTIONS];
@@ -71,10 +63,10 @@ void read_program_file() {
     fclose(prg_stream);
 }
 
-/// @brief 
-/// @param in 
-/// @return 
-uint8_t instr_to_uint_8b(struct instr_to_8bit* in) {
+/// @brief Takes a binary representation of an instruction and returns the integer value.
+/// @param in The binary instruction to translate.
+/// @return Returns an integer value representing the instruction.
+uint8_t binary_to_uint_8b(struct instr_to_8bit* in) {
 
     // First part here is just copying an concatting the 2 bits for rst2 onto r1.
     size_t reg_length = strlen(in->r1) + strlen(in->rst2) + 1;
@@ -118,6 +110,8 @@ uint8_t instr_to_uint_8b(struct instr_to_8bit* in) {
     // Then add the register bits to it.
     name_val *= 16;
     name_val += reg_val;
+
+    free(reg_combined);
     return name_val;
 }
 
@@ -147,12 +141,14 @@ void sepperate_instructions() {
         // R1: binary representation of the first register input.
         // Rst2: binary representation of the second input (register/immidiate).
         struct instr_to_8bit* res = malloc(sizeof(struct instr_to_8bit));
+        assert(res != NULL);
 
         // Holds the current instructions 'iargs':
         // Name: Name of instruction as char*.
         // Upcodes_4b: Upcode1 and 2 as a char*.
         // Num_args: Number of arguments for the current instruction.
         struct instr_args* iargs = malloc(sizeof(struct instr_args));
+        assert(iargs != NULL);
 
         // Gets upcode 1 and 2 that matches the name of the instruction.
         // Saves it in iargs.
@@ -189,7 +185,7 @@ void sepperate_instructions() {
 
         // Gets the integer value of the instruction
         // and stores it in p.
-        uint8_t int_val = instr_to_uint_8b(res);
+        uint8_t int_val = binary_to_uint_8b(res);
         p[i] = int_val;
         free(res);
         free(iargs);
