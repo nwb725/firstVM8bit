@@ -171,6 +171,7 @@ void execute_instructions() {
         }
         break;  
     // Control flow - upcode '11'
+    // Subtracting one from jumps since pc gets updated anyway.
     case 0x3:
         switch (d_curr_instr->upcode2) {
         // JMP - Jumps to address r1 + rst2 lets say: xxxx 0110, then 'JMP 6'
@@ -179,13 +180,13 @@ void execute_instructions() {
             printf("JMP r%d r%d\n", r1, rst2);
             // Keeps only the last 4 bits for jumping addr.
             temp = (curr_instr & 0xF);
-            pc = temp + PROG_START_ADDR;
+            pc = temp + PROG_START_ADDR - 1;
             break;
         // JMPZ - Jumps to addr rst2 only if value in r1 is zero.
         case 0x1:
             printf("JMPZ r%d r%d", r1, rst2);
             if (regs[r1] == 0) {
-                pc = regs[rst2] + PROG_START_ADDR;
+                pc = regs[rst2] + PROG_START_ADDR - 1;
             }
             break;
         // JMPNZ - Jumps to addr rst2 only if value in r1 is NOT zero.
