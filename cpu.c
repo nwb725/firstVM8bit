@@ -179,21 +179,20 @@ void execute_instructions() {
             printf("JMP r%d r%d\n", r1, rst2);
             // Keeps only the last 4 bits for jumping addr.
             temp = (curr_instr & 0xF);
-            pc = temp;
+            pc = temp + PROG_START_ADDR;
             break;
         // JMPZ - Jumps to addr rst2 only if value in r1 is zero.
         case 0x1:
             printf("JMPZ r%d r%d", r1, rst2);
             if (regs[r1] == 0) {
-                pc = regs[rst2];
+                pc = regs[rst2] + PROG_START_ADDR;
             }
             break;
         // JMPNZ - Jumps to addr rst2 only if value in r1 is NOT zero.
         case 0x2:
             printf("JMPNZ r%d r%d\n", r1, rst2);
             if (regs[r1] != 0) {
-                printf("JMPNZ - Jumping to: %d\n", regs[rst2]);
-                pc = regs[rst2];
+                pc = regs[rst2] + PROG_START_ADDR - 1;
             }
             break;
         // HLT - Stops execution. 
@@ -241,5 +240,6 @@ int main() {
     get_program();
     init_regs();
     run_program();
+    print_regs();
     return 0;
 }

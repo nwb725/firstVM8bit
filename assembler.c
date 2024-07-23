@@ -125,6 +125,7 @@ void sepperate_instructions() {
     }
 
     char* temp[num_instructions];
+    printf("%d\n", num_instructions);
 
     // Gets the first instruction.
     temp[0] = strtok(instrs, "\n");
@@ -153,8 +154,17 @@ void sepperate_instructions() {
         // Gets upcode 1 and 2 that matches the name of the instruction.
         // Saves it in iargs.
         iargs->name = strtok(temp[i], " ");
-        get_upcodes(iargs);
 
+        // If the there is an empty line at the end of the program
+        // This handles so it doesnt crash.
+        if (iargs->name == NULL) {
+            printf("Null instruction, most likely empty line.\n");
+            free(res);
+            free(iargs);
+            return;
+        }
+        
+        get_upcodes(iargs);
         switch (iargs->num_args) {
         // Only HLT has 0 args.
         case 0:
@@ -182,7 +192,6 @@ void sepperate_instructions() {
             printf("Error in mapping arguments to binary.\n");
             break;
         }
-
         // Gets the integer value of the instruction
         // and stores it in p.
         uint8_t int_val = binary_to_uint_8b(res);
@@ -213,10 +222,8 @@ void get_program() {
     init_memory();
     read_program_file();
 
-
     p = malloc(sizeof(uint8_t) * cnt);
     sepperate_instructions(p);
-
     for (int i = 0; i < cnt; i++) {
         write_memory(PROG_START_ADDR + i, p[i]);
     }

@@ -98,7 +98,6 @@ char* get_regs(char* reg) {
     if (strcmp(reg, "r3") == 0) {
         return "11";
     } else {
-        printf("Unknown register: %s\n", reg);
-        exit(EXIT_FAILURE);
+        return reg;
     }
 }
