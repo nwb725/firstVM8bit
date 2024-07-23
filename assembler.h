@@ -9,8 +9,11 @@
 #define MAX_INSTRUCTIONS 192
 
 struct instr_to_8bit {
+    // 4bits of upcode.
     char* name;
+    // 2bits for r1.
     char* r1;
+    // 2bits for rst2.
     char* rst2;
 };
 

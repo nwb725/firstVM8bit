@@ -6,13 +6,17 @@
 
 /// @brief Gets called in the assembler, maps the name of an instruction
 /// to a given upcode 1 and 2 - and the number of arguments for that instruction.
+/// IMPORTANT: Instructions that use immidiates such as LDI
+/// Will be set to have 1 argument, and will be handled in assembler.
+/// (LDI and ADDI).
 /// @param iargs A pointer to the current instruction, contains only name.
 void get_upcodes(struct instr_args* iargs) {
     char* instr = iargs->name;
 
     if (strcmp(instr, "LDI") == 0) {
         iargs->upcodes_4b = "0000";
-        iargs->num_args = 2;
+        iargs->num_args = 1;
+        iargs->has_imm = 1;
     }
     if (strcmp(instr, "LD") == 0) {
         iargs->upcodes_4b = "0001";
@@ -40,7 +44,8 @@ void get_upcodes(struct instr_args* iargs) {
     }
     if (strcmp(instr, "ADDI") == 0) {
         iargs->upcodes_4b = "0111";
-        iargs->num_args = 2;
+        iargs->num_args = 1;
+        iargs->has_imm = 1;
     }
 
     if (strcmp(instr, "AND") == 0) {
@@ -62,24 +67,23 @@ void get_upcodes(struct instr_args* iargs) {
 
     if (strcmp(instr, "JMP") == 0) {
         iargs->upcodes_4b = "1100";
-        iargs->num_args = 2;
+        iargs->num_args = 1;
     }
     if (strcmp(instr, "JMPZ") == 0) {
         iargs->upcodes_4b = "1101";
-        iargs->num_args = 2;
+        iargs->num_args = 1;
+        iargs->has_imm = 1;
     }
     if (strcmp(instr, "JMPNZ") == 0) {
         iargs->upcodes_4b = "1110";
-        iargs->num_args = 2;
+        iargs->num_args = 1;
+        iargs->has_imm = 1;
     }
     if (strcmp(instr, "HLT") == 0) {
         iargs->upcodes_4b = "1111";
         iargs->num_args = 0;
     }
-/*     else {
-        printf("Instruction name does not exist and didnt get matched: %s\n", instr);
-        exit(EXIT_FAILURE);   
-    } */
+    // Needs to be handled and error if the instruction name does not exist.
 }
 
 /// @brief Maps the register name to a given hex value.
@@ -98,6 +102,7 @@ char* get_regs(char* reg) {
     if (strcmp(reg, "r3") == 0) {
         return "11";
     } else {
-        return reg;
+        printf("Error in mapping register. Got: %s\n", reg);
+        exit(EXIT_FAILURE);
     }
 }

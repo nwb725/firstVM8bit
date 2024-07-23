@@ -1,17 +1,14 @@
-LDI r0 01
-LDI r1 10
+LDI r0 10
+LDI r1 5
 ADD r0 r1
-ADDI r1 01
-MUL r2 r0
-SUB r2 r1
-AND r0 r2
-OR r1 r3
-XOR r2 r0
-NOT r1 r2
-LDI r1 00
-JMPNZ r1 r3
-LDI r3 11
-MUL r3 r2
+JMPZ r0 8 
+LDI r2 15
+SUB r0 r2
+MUL r1 r2
+MOV r3 r1
+JMPNZ r0 10 
+XOR r0 r3
+OR r1 r2
+AND r2 r3
+NOT r3 r2
 HLT
-
-

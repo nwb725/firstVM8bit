@@ -95,7 +95,7 @@ void execute_instructions() {
         // LDI - Load immidiate rst2 into r1.
         case 0x0:
             printf("LDI r%d %d\n", r1, rst2);
-            regs[r1] = rst2;
+            regs[r1] = read_immidiates(pc - PROG_START_ADDR);
             break;
         // LD - Load value from addr[rst2] into r1
         case 0x1:
@@ -137,7 +137,7 @@ void execute_instructions() {
         // ADDI - Add value in r1 with immidiate value in rst2, and stores in r1. 
         case 0x3:
             printf("ADDI r%d %d\n", r1, rst2);
-            regs[r1] += rst2;
+            regs[r1] += read_immidiates(pc - PROG_START_ADDR);
             break;
         default:
             break;
@@ -174,26 +174,25 @@ void execute_instructions() {
     // Subtracting one from jumps since pc gets updated anyway.
     case 0x3:
         switch (d_curr_instr->upcode2) {
-        // JMP - Jumps to address r1 + rst2 lets say: xxxx 0110, then 'JMP 6'
+        // JMP - Jumps to value at r1.
         // Might need to rethink the logic here...
         case 0x0:
             printf("JMP r%d r%d\n", r1, rst2);
             // Keeps only the last 4 bits for jumping addr.
-            temp = (curr_instr & 0xF);
-            pc = temp + PROG_START_ADDR - 1;
+            pc = regs[r1] + PROG_START_ADDR - 1;
             break;
         // JMPZ - Jumps to addr rst2 only if value in r1 is zero.
         case 0x1:
             printf("JMPZ r%d r%d", r1, rst2);
             if (regs[r1] == 0) {
-                pc = regs[rst2] + PROG_START_ADDR - 1;
+                pc = read_immidiates(pc - PROG_START_ADDR) - 1;
             }
             break;
         // JMPNZ - Jumps to addr rst2 only if value in r1 is NOT zero.
         case 0x2:
             printf("JMPNZ r%d r%d\n", r1, rst2);
             if (regs[r1] != 0) {
-                pc = regs[rst2] + PROG_START_ADDR - 1;
+                pc = read_immidiates(pc - PROG_START_ADDR) - 1;
             }
             break;
         // HLT - Stops execution. 
@@ -216,9 +215,13 @@ void execute_instructions() {
     pc++;
 }
 
-
 /// @brief Runs the program, only stops when the HALT flag is set.
+/// First it assembles the program.txt file
+/// Then it writes it to memory
+/// The registers are then initialized to 0.
 void run_program() {
+    get_program();
+    init_regs();
     while (running != HALT) {
         execute_instructions();
     }
@@ -231,15 +234,10 @@ void run_program() {
 // At last the register values are printed. Mostly for debugging.
 
 /// @brief 
-/// First it assembles the program.txt file
-/// Then it writes it to memory
-/// The registers are then initialized to 0.
-/// Then the program is run untill the HALT flag is set.
+/// The program is run untill the HALT flag is set.
 /// At last the register values are printed, Mostly for debugging.
 /// @return Returns 0 on success.
 int main() {
-    get_program();
-    init_regs();
     run_program();
     print_regs();
     return 0;

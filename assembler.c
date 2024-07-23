@@ -15,6 +15,7 @@ char instrs[MAX_INSTRUCTIONS];
 
 /// @brief This points to a list that holds all uint8_t values for all instructions.
 uint8_t* p;
+uint8_t* imms;
 
 /// @brief Counts the number of instructions in a program.
 /// @param fp The program file.
@@ -115,6 +116,15 @@ uint8_t binary_to_uint_8b(struct instr_to_8bit* in) {
     return name_val;
 }
 
+/// @brief Used for instructions that make use of an immidiate.
+/// Converts the immidiate from a char* to a uint8_t type.
+/// @param imm The immidiate to convert.
+/// @return Returns the immidiate as an uint8_t.
+uint8_t char_to_uint8(char* imm) {
+    uint8_t r = strtoul(imm, NULL, 10);
+    return r;
+}
+
 /// @brief Sepperates each instruction by: NAME R1 RST2, so that they can me mapped.
 /// Then uses instr_to_uint_8b to convert the split instruction into a uint.
 void sepperate_instructions() {
@@ -137,6 +147,9 @@ void sepperate_instructions() {
     // NEEDS EXPLANATION!
     for (int i = 0; i < num_instructions; i++) {
 
+        char* imm_map;
+        uint8_t imm_res;
+
         // Holds the binary sequences of an instruction.
         // Name: Binary representation of the name (Upcode 1 and 2).
         // R1: binary representation of the first register input.
@@ -155,6 +168,9 @@ void sepperate_instructions() {
         // Saves it in iargs.
         iargs->name = strtok(temp[i], " ");
 
+        // Does not use immidiate by default.
+        // If set to 1 then the instruction uses an immidiate.
+        iargs->has_imm = 0;
         // If the there is an empty line at the end of the program
         // This handles so it doesnt crash.
         if (iargs->name == NULL) {
@@ -172,12 +188,16 @@ void sepperate_instructions() {
             res->r1 = DEFAULT_REG_VAL;
             res->rst2 = DEFAULT_REG_VAL;
             break;
+        // All instructions that use immidiates have 1 arg 
+        // using the logic of immidate != an arg.
         case 1:
             res->name = iargs->upcodes_4b;
 
             char* t = strtok(NULL, " ");
+
             res->r1 = get_regs(t);
             res->rst2 = DEFAULT_REG_VAL;
+            
             break;
         case 2:
             res->name = iargs->upcodes_4b;
@@ -196,6 +216,15 @@ void sepperate_instructions() {
         // and stores it in p.
         uint8_t int_val = binary_to_uint_8b(res);
         p[i] = int_val;
+
+        // If it uses an immidiate, save it in imms.
+        if (iargs->has_imm == 1) {
+            imm_map = strtok(NULL, " ");
+            imm_res = char_to_uint8(imm_map);
+            imms[i] = imm_res;
+            // Do something here with the imm_res.
+        }
+
         free(res);
         free(iargs);
     }
@@ -218,18 +247,21 @@ void print_instr_split() {
 void get_program() {
     int cnt = count_instructions(PROGRAM_PATH);
 
-
     init_memory();
     read_program_file();
 
     p = malloc(sizeof(uint8_t) * cnt);
-    sepperate_instructions(p);
+    imms = malloc(sizeof(uint8_t) * cnt);
+
+    sepperate_instructions();
     for (int i = 0; i < cnt; i++) {
         write_memory(PROG_START_ADDR + i, p[i]);
+        write_immidiates(i, imms[i]);
+        printf("P: %d\n", p[i]);
     }
 
     // print_memory();
-
+    free(imms);
     free(p);
 }
 
