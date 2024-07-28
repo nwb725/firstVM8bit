@@ -6,6 +6,13 @@
 #include "memory.h"
 #include "assembler.h"
 
+
+// TODO: Multibyte instructions: 
+// First Byte: Opcode (4 bits) + Destination Register (4 bits)
+// Second Byte: Source Register (4 bits) + (Unused or Modifier bits (4 bits))
+// This would make it possible to have 15 registers.
+// Making it possible to expand using I/O or file management.
+
 // 'regs' is the array of registers i will have 4 registers.
 // r0 - Is always 0.
 // r1, r2 and r3 - General purpose registers.
