@@ -66,32 +66,25 @@ void print_8bit_instr(uint8_t instr) {
 }
 
 
-/// @brief Takes and instruction and decodes it.
-/// @param instr The instruction to decode.
-/// @return Returns a pointer the the decoded instruction.
-struct d_instr* decode(uint8_t instr) {
-
-    // Assume we have 8 bits 0000 0000
-    // The first 2 are the upcode
-    // the second 2 are the second upcode
-    // the third 2 are for the register
-    // and the last 2 are r2/imm/addr.
-
+/// @brief Decodes a multibyte instruction.
+/// Assume we have the first 8 bits: first 4 bits are first and second upcode,
+/// the next 4 bits are for the first register. It then fetches the next instruction,
+/// Where either the 4 least significant bits are a register or an 8bit immidiate.
+struct d_instr* multibyte_decode(uint8_t instr) {
     struct d_instr* de = allocate_decoded_instruction();
     de->upcode   = (instr >> 6);
     de->upcode2  = (instr >> 4) & 0x3;
-    de->r1       = (instr >> 2) & 0x3;
-    de->rst2     = (instr & 0x3);
+    de->r1       = (instr & 0xF);
+    de->rst2     = fetch_instr(++pc);
     return de;
 }
-
 
 /// @brief The function for executing instructions.
 /// It fetches the next instruction, matches the upcode,
 /// and executes it. Then updates the program counter.
 void execute_instructions() {
     uint8_t curr_instr = fetch_instr(pc);
-    struct d_instr* d_curr_instr = decode(curr_instr);
+    struct d_instr* d_curr_instr = multibyte_decode(curr_instr);
     int r1 = d_curr_instr->r1;
     int rst2 = d_curr_instr->rst2;
 
@@ -102,7 +95,7 @@ void execute_instructions() {
         // LDI - Load immidiate rst2 into r1.
         case 0x0:
             printf("LDI r%d %d\n", r1, rst2);
-            regs[r1] = read_immidiates(pc - PROG_START_ADDR);
+            regs[r1] = rst2;
             break;
         // LD - Load value from addr[rst2] into r1
         case 0x1:
@@ -144,7 +137,7 @@ void execute_instructions() {
         // ADDI - Add value in r1 with immidiate value in rst2, and stores in r1. 
         case 0x3:
             printf("ADDI r%d %d\n", r1, rst2);
-            regs[r1] += read_immidiates(pc - PROG_START_ADDR);
+            regs[r1] += rst2;
             break;
         default:
             break;
@@ -168,10 +161,10 @@ void execute_instructions() {
             printf("XOR r%d r%d\n", r1, rst2);
             regs[r1] ^= regs[rst2];
             break;
-        // NOT - bitwise NOT value in r1 and stores in rst2. 
+        // NOT - bitwise NOT value in rst2 and stores in r1. 
         case 0x3:
             printf("NOT r%d r%d\n", r1, rst2);
-            regs[rst2] = ~regs[r1];
+            regs[r1] = ~regs[rst2];
             break;
         default:
             break;
@@ -184,22 +177,22 @@ void execute_instructions() {
         // JMP - Jumps to value at r1.
         // Might need to rethink the logic here...
         case 0x0:
-            printf("JMP r%d r%d\n", r1, rst2);
+            printf("JMP r%d\n", r1);
             // Keeps only the last 4 bits for jumping addr.
             pc = regs[r1] + PROG_START_ADDR - 1;
             break;
         // JMPZ - Jumps to addr rst2 only if value in r1 is zero.
         case 0x1:
-            printf("JMPZ r%d r%d", r1, rst2);
+            printf("JMPZ r%dr%d", r1, rst2);
             if (regs[r1] == 0) {
-                pc = read_immidiates(pc - PROG_START_ADDR) - 1;
+                pc = rst2;
             }
             break;
         // JMPNZ - Jumps to addr rst2 only if value in r1 is NOT zero.
         case 0x2:
-            printf("JMPNZ r%d r%d\n", r1, rst2);
+            printf("JMPNZ r%d %d\n", r1, rst2);
             if (regs[r1] != 0) {
-                pc = read_immidiates(pc - PROG_START_ADDR) - 1;
+                pc = rst2;
             }
             break;
         // HLT - Stops execution. 

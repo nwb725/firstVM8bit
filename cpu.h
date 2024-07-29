@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-// r1 to r4 are the 4 general purpose registers, and r0 is zero.
-#define NUM_REGS 4
+// Using multibyte instructions, we have 16 registers.
+#define NUM_REGS 16
 #define RUNNING 0
 #define HALT 1
 #define PROG_START_ADDR 64
@@ -16,6 +16,7 @@ struct d_instr {
     uint8_t r1;
     uint8_t rst2;
 };
+
 
 
 #endif // VM_H

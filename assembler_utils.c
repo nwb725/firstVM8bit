@@ -91,16 +91,52 @@ void get_upcodes(struct instr_args* iargs) {
 /// @return Returns a hex value that matches the register name.
 char* get_regs(char* reg) {
     if (strcmp(reg, "r0") == 0) {
-        return "00";
+        return "0000";
     } 
     if (strcmp(reg, "r1") == 0) {
-        return "01";
+        return "0001";
     } 
     if (strcmp(reg, "r2") == 0) {
-        return "10";
+        return "0010";
     } 
     if (strcmp(reg, "r3") == 0) {
-        return "11";
+        return "0011";
+    }
+    if (strcmp(reg, "r4") == 0) {
+        return "0100";
+    } 
+    if (strcmp(reg, "r5") == 0) {
+        return "0101";
+    } 
+    if (strcmp(reg, "r6") == 0) {
+        return "0110";
+    } 
+    if (strcmp(reg, "r7") == 0) {
+        return "0111";
+    }
+    if (strcmp(reg, "r8") == 0) {
+        return "1000";
+    } 
+    if (strcmp(reg, "r9") == 0) {
+        return "1001";
+    } 
+    if (strcmp(reg, "r10") == 0) {
+        return "1010";
+    } 
+    if (strcmp(reg, "r11") == 0) {
+        return "1011";
+    }
+    if (strcmp(reg, "r12") == 0) {
+        return "1100";
+    } 
+    if (strcmp(reg, "r13") == 0) {
+        return "1101";
+    } 
+    if (strcmp(reg, "r14") == 0) {
+        return "1110";
+    } 
+    if (strcmp(reg, "r15") == 0) {
+        return "1111";
     } else {
         printf("Error in mapping register. Got: %s\n", reg);
         exit(EXIT_FAILURE);
