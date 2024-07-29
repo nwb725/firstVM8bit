@@ -15,7 +15,6 @@ char instrs[MAX_INSTRUCTIONS];
 
 /// @brief This points to a list that holds all uint8_t values for all instructions.
 uint8_t* p;
-uint8_t* imms;
 
 /// @brief Counts the number of instructions in a program.
 /// @param fp The program file.
@@ -63,6 +62,21 @@ void read_program_file() {
 
     fclose(prg_stream);
 }
+uint8_t binary_to_uint_rst2(struct instr_to_8bit* in) {
+    size_t reg_length = strlen(in->rst2) + 1;
+    uint8_t reg_val = 0;
+    int inc = -1;
+
+    for (int i = reg_length-1; i > -1; i--) {
+        if (in->rst2[i] == '1') {
+            reg_val += (uint8_t)pow(2, inc);
+        }
+        inc++;
+    } 
+
+    return reg_val;
+
+}
 
 /// @brief Takes a binary representation of an instruction and returns the integer value.
 /// @param in The binary instruction to translate.
@@ -70,23 +84,13 @@ void read_program_file() {
 uint8_t binary_to_uint_8b(struct instr_to_8bit* in) {
 
     // First part here is just copying an concatting the 2 bits for rst2 onto r1.
-    size_t reg_length = strlen(in->r1) + strlen(in->rst2) + 1;
+    size_t reg_length = strlen(in->r1) + 1;
     size_t name_length = strlen(in->name) + 1;
 
-    char* reg_combined = (char *)malloc(reg_length);
-    if (reg_combined == NULL) {
-        printf("Failed to allocate memory");
-        exit(EXIT_FAILURE);
-    }
-
-    strcpy(reg_combined, in->r1);
-    strcat(reg_combined, in->rst2);
-
-    // Now we loop over the string and see if it is 1 then +=i^2.
     uint8_t reg_val = 0;
     uint8_t name_val = 0;
     int inc = -1;
-
+    // Now we loop over the string and see if it is 1 then +=i^2.
     // First name:
     for (int i = name_length-1; i > -1; i--) {
         if (in->name[i] == '1') {
@@ -99,7 +103,7 @@ uint8_t binary_to_uint_8b(struct instr_to_8bit* in) {
 
     // Now regs:
     for (int i = reg_length-1; i > -1; i--) {
-        if (reg_combined[i] == '1') {
+        if (in->r1[i] == '1') {
             reg_val += (uint8_t)pow(2, inc);
         }
         inc++;
@@ -112,7 +116,6 @@ uint8_t binary_to_uint_8b(struct instr_to_8bit* in) {
     name_val *= 16;
     name_val += reg_val;
 
-    free(reg_combined);
     return name_val;
 }
 
@@ -134,9 +137,8 @@ void sepperate_instructions() {
         exit(EXIT_FAILURE);
     }
 
+    // Every instruction is a multibyte, so we have to store instructions * 2 uints.
     char* temp[num_instructions];
-    printf("%d\n", num_instructions);
-
     // Gets the first instruction.
     temp[0] = strtok(instrs, "\n");
     // Loads every instruction after the first into temp
@@ -145,10 +147,10 @@ void sepperate_instructions() {
     }
 
     // NEEDS EXPLANATION!
-    for (int i = 0; i < num_instructions; i++) {
+    int curr = 0;
+    for (int i = 0; i < num_instructions*2; i++) {
 
         char* imm_map;
-        uint8_t imm_res;
 
         // Holds the binary sequences of an instruction.
         // Name: Binary representation of the name (Upcode 1 and 2).
@@ -166,7 +168,8 @@ void sepperate_instructions() {
 
         // Gets upcode 1 and 2 that matches the name of the instruction.
         // Saves it in iargs.
-        iargs->name = strtok(temp[i], " ");
+        iargs->name = strtok(temp[curr], " ");
+        curr++;
 
         // Does not use immidiate by default.
         // If set to 1 then the instruction uses an immidiate.
@@ -179,7 +182,6 @@ void sepperate_instructions() {
             free(iargs);
             return;
         }
-        
         get_upcodes(iargs);
         switch (iargs->num_args) {
         // Only HLT has 0 args.
@@ -196,6 +198,7 @@ void sepperate_instructions() {
             char* t = strtok(NULL, " ");
 
             res->r1 = get_regs(t);
+
             res->rst2 = DEFAULT_REG_VAL;
             
             break;
@@ -212,17 +215,22 @@ void sepperate_instructions() {
             printf("Error in mapping arguments to binary.\n");
             break;
         }
-        // Gets the integer value of the instruction
+        // Gets the integer value of the first 8bits of the instruction
         // and stores it in p.
-        uint8_t int_val = binary_to_uint_8b(res);
-        p[i] = int_val;
+        uint8_t fst_int_val = binary_to_uint_8b(res);
+        p[i] = fst_int_val;
+        i++;
 
-        // If it uses an immidiate, save it in imms.
+        // Case it uses an immidiate.
         if (iargs->has_imm == 1) {
             imm_map = strtok(NULL, " ");
-            imm_res = char_to_uint8(imm_map);
-            imms[i] = imm_res;
-            // Do something here with the imm_res.
+            p[i] = char_to_uint8(imm_map);
+        }
+
+        // Case it does not use an immidiate and has 2 args.
+        if (iargs->has_imm == 0 && iargs->num_args == 2) {
+            uint8_t snd_int_val = binary_to_uint_rst2(res);
+            p[i] = snd_int_val;
         }
 
         free(res);
@@ -246,22 +254,17 @@ void print_instr_split() {
 /// and writes the program to memory.
 void get_program() {
     int cnt = count_instructions(PROGRAM_PATH);
-
     init_memory();
     read_program_file();
 
-    p = malloc(sizeof(uint8_t) * cnt);
-    imms = malloc(sizeof(uint8_t) * cnt);
+    p = malloc(sizeof(uint8_t) * 2 * cnt);
 
     sepperate_instructions();
-    for (int i = 0; i < cnt; i++) {
+    for (int i = 0; i < cnt*2 - 1; i++) {
         write_memory(PROG_START_ADDR + i, p[i]);
-        write_immidiates(i, imms[i]);
-        printf("P: %d\n", p[i]);
     }
 
     // print_memory();
-    free(imms);
     free(p);
 }
 
