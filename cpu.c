@@ -7,11 +7,27 @@
 #include "assembler.h"
 
 
-// TODO: Multibyte instructions: 
-// First Byte: Opcode (4 bits) + Destination Register (4 bits)
-// Second Byte: Source Register (4 bits) + (Unused or Modifier bits (4 bits))
-// This would make it possible to have 15 registers.
-// Making it possible to expand using I/O or file management.
+// TODO: CLI.
+// Step 1: Initialize the VM, init registers, memory and so on.
+// Step 2: Let the user decide and be able to interact with the VM:
+// COMMANDS:
+//        BASIC:
+//      - load <filename> => Loads a .txt file into memory.
+//      - run => Runs the current program, until an error or HLT.
+//      - step => Step executes 1 instruction (The next).
+//      - reset => Resets the VM to the intial state.
+//      - exit => Exits the CLI tool.
+//
+//        INSPECTION:
+//      - regs => Displays the value of all registers
+//      - mem <addr> <len> => Displays all memory from addr to addr + len.
+//      - break <addr> => Sets a breakpoint at addr.
+//      - clear <addr> => Clears a breakpoint at addr.
+//      - peak <addr> => Look at memory at addr.
+//      - poke <addr> <val> => Overwrites memory at addr with val.
+//
+//        MORE ADVANCED:
+//      - trace <on | off> => Traces and logs the program.
 
 // 'regs' is the array of registers i will have 4 registers.
 // r0 - Is always 0.
@@ -227,11 +243,6 @@ void run_program() {
     }
 }
 
-// First it assembles the program.txt file
-// Then it writes it to memory
-// The registers are then initialized to 0.
-// Then the program is run untill the HALT flag is set.
-// At last the register values are printed. Mostly for debugging.
 
 /// @brief 
 /// The program is run untill the HALT flag is set.
