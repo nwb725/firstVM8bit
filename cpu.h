@@ -17,6 +17,10 @@ struct d_instr {
     uint8_t rst2;
 };
 
+void run_program();
+void reset_regs();
+void init_regs();
+void print_regs();
 
 
 #endif // VM_H

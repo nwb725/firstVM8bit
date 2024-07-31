@@ -18,7 +18,7 @@ struct instr_to_8bit {
 
 
 void print_instr_split();
-void read_program_file();
-void get_program();
+void read_program_file(const char* fname);
+void get_program(const char* fp);
 
 #endif

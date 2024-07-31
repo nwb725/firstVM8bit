@@ -7,31 +7,9 @@
 #include "assembler.h"
 
 
-// TODO: CLI.
-// Step 1: Initialize the VM, init registers, memory and so on.
-// Step 2: Let the user decide and be able to interact with the VM:
-// COMMANDS:
-//        BASIC:
-//      - load <filename> => Loads a .txt file into memory.
-//      - run => Runs the current program, until an error or HLT.
-//      - step => Step executes 1 instruction (The next).
-//      - reset => Resets the VM to the intial state.
-//      - exit => Exits the CLI tool.
-//
-//        INSPECTION:
-//      - regs => Displays the value of all registers
-//      - mem <addr> <len> => Displays all memory from addr to addr + len.
-//      - break <addr> => Sets a breakpoint at addr.
-//      - clear <addr> => Clears a breakpoint at addr.
-//      - peak <addr> => Look at memory at addr.
-//      - poke <addr> <val> => Overwrites memory at addr with val.
-//
-//        MORE ADVANCED:
-//      - trace <on | off> => Traces and logs the program.
-
-// 'regs' is the array of registers i will have 4 registers.
+// 'regs' is the array of registers i will have 15 registers.
 // r0 - Is always 0.
-// r1, r2 and r3 - General purpose registers.
+// TEMPORARY: r1 .. r14 - General purpose registers.
 uint8_t regs[NUM_REGS];
 
 // The program counter, starts at 64 always.
@@ -50,6 +28,11 @@ void init_regs() {
     for (int i = 0; i<NUM_REGS; i++) {
         regs[i] = 0;
     }
+}
+
+/// @brief Resets registers to initial value.
+void reset_regs() {
+    init_regs();
 }
 
 /// @brief Prints the values in each register
@@ -236,20 +219,7 @@ void execute_instructions() {
 /// Then it writes it to memory
 /// The registers are then initialized to 0.
 void run_program() {
-    get_program();
-    init_regs();
     while (running != HALT) {
         execute_instructions();
     }
-}
-
-
-/// @brief 
-/// The program is run untill the HALT flag is set.
-/// At last the register values are printed, Mostly for debugging.
-/// @return Returns 0 on success.
-int main() {
-    run_program();
-    print_regs();
-    return 0;
 }

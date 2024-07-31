@@ -22,7 +22,7 @@ uint8_t* p;
 int count_instructions(const char *fp) {
     FILE *file = fopen(fp, "r");
     if (file == NULL) {
-        perror("Error opening file");
+        perror("Error opening file - COUNT.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -46,11 +46,11 @@ int count_instructions(const char *fp) {
 }
 
 /// @brief Reads the program into the buffer (instrs).
-void read_program_file() {
+void read_program_file(const char* fname) {
     // Opens the file for reading
-    FILE* prg_stream = fopen(PROGRAM_PATH, "r");
+    FILE* prg_stream = fopen(fname, "r");
     if (prg_stream == NULL) {
-        printf("Error opening file");
+        printf("Error opening file - READPROG.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -130,8 +130,8 @@ uint8_t char_to_uint8(char* imm) {
 
 /// @brief Sepperates each instruction by: NAME R1 RST2, so that they can me mapped.
 /// Then uses instr_to_uint_8b to convert the split instruction into a uint.
-void sepperate_instructions() {
-    int num_instructions = count_instructions(PROGRAM_PATH);
+void sepperate_instructions(const char* fp) {
+    int num_instructions = count_instructions(fp);
     if (num_instructions <= 0) {
         printf("Number of instructions is less then or equal 0: %d\n", num_instructions);
         exit(EXIT_FAILURE);
@@ -252,14 +252,13 @@ void print_instr_split() {
 
 /// @brief Initializes memory, reads and parses the program
 /// and writes the program to memory.
-void get_program() {
-    int cnt = count_instructions(PROGRAM_PATH);
+void get_program(const char* fp) {
+    int cnt = count_instructions(fp);
     init_memory();
-    read_program_file();
 
     p = malloc(sizeof(uint8_t) * 2 * cnt);
 
-    sepperate_instructions();
+    sepperate_instructions(fp);
     for (int i = 0; i < cnt*2 - 1; i++) {
         write_memory(PROG_START_ADDR + i, p[i]);
     }
