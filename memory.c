@@ -47,6 +47,11 @@ void print_memory() {
     printf("\n");
 }
 
+/// @brief Resets memory back to initial state.
+void reset_memory() {
+    init_memory();
+}
+
 /// @brief Writes a value to memory.
 /// @param address The address to write to.
 /// @param value The value to write.
