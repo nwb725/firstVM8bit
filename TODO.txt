@@ -1,0 +1,40 @@
+1. ADD THIS TO .GITIGNORE
+
+2. REGISTERS:
+    - CURRENT: Registers r0 through r15 are all general purpose registers, there are no restrictions.
+    Can be used as the user likes.
+
+    - IDEA: Make r0 be a register that always contains 0. Making it easier to use jump instructions as
+    JMPZ and JMPNZ. Also need to figure out what other special registers there is needed. Ofc. there needs to
+    be some amount of general purpose registers e.g. r1 through r9.
+
+3. CPU:
+    - CURRENT: Works fine, need to reconsider the JMP instruction, maybe replace it with SCALL (System call). 
+    - IDEA: Might want to add a 'RET' keyword, that returns to a specific address in memory, might be stored at a special register.
+
+4. ASSEMBLER: 
+    - IDEA: Make it so you can comment inside the program. Makes it easier to understand if it is a larger program.    
+
+5. INTERFACE: 
+    CURRENT: Need to finish functionality. Need to figure out a smart way to keep track of the current state.
+    The state can be used to reduce or increase functionality of the machine, and reduces errors and exit failures.
+
+6. GENERAL:
+    IDEA: Increase the number of bits in the upcode to (2 bits upcode 1, 3 bits upcode 2). This makes
+    for 4 areas of instructions Each with 7 specific instructions. This could open up new areas of implementation.
+
+    Currently the instructions look like: 
+
+    + First byte: [[U1: U1: U2: U2] [R1: R1: R1: R1]] 
+    + Second bye: [ IMM ] OR [[0: 0: 0: 0][R2: R2: R2: R2]]
+
+    The idea is to make it like this:
+
+    + First byte: [[U1: U1: U2: U2] [U2: HAS_IMM: NUM_ARGS: NUM_ARGS]] 
+    + Second bye: [ IMM ] OR [[0: 0: 0: 0][R2: R2: R2: R2]] OR [[0: 0: 0: 0][R1: R1: R1: R1]]
+
+    In case that the instructions uses an immidiate and a register i.e. LDI or ADDI, then we introduce a third byte:
+
+    + Third byte: [ IMM ]
+
+    IDEA: Add custom errors for each part of the machine.

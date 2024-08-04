@@ -28,43 +28,75 @@
 //        MORE ADVANCED:
 //      - trace <on | off> => Traces and logs the program.
 
+/// @brief Parses the user input.
+struct command *parse_command(char *in)
+{
+    struct command *c = malloc(sizeof(struct command));
+    char *c_name = strtok(in, " ");
+    char *c_arg = strtok(NULL, " ");
 
-/// @brief Resets the virtual machine to initial state. 
-void vm_reset() {
+    c->name = c_name;
+
+    if (c_arg == NULL)
+    {
+        return c;
+    }
+
+    c->args = c_arg;
+    return c;
+
+    printf("Error in parsing commands. Got: <%s>, from user", in);
+    exit(EXIT_FAILURE);
+}
+
+void vm_cleanup()
+{
+    /// TODO: Should clean up allocations.
+}
+
+/// @brief Resets the virtual machine to initial state.
+void vm_reset()
+{
     reset_memory();
     reset_regs();
 }
 
 /// @brief Loads a .txt file into memory.
 /// @param fname Name of file to load into memory.
-void vm_load(char* fname) {
+void vm_load(char *fname)
+{
     read_program_file(fname);
     get_program(fname);
     printf("Program from '%s' successfully written to memory!\n", fname);
 }
 
 /// @brief Executes the program that is stored in memory.
-void vm_run_prog() {
+void vm_run_prog()
+{
     run_program();
 }
 
 /// @brief Terminates the VM.
-void vm_exit() {
-    exit(EXIT_SUCCESS);
+void vm_exit()
+{
+    /// TODO: Sets state->exit = TRUE, runs cleanup.
 }
 
 /// @brief Prints all registers and their values.
-void vm_regs() {
+void vm_regs()
+{
     print_regs();
 }
 
 /// @brief Prints memory.
-void vm_mem() {
+void vm_mem()
+{
     print_memory();
 }
 
 /// @brief Gives the user a list of commands.
-void vm_help() {
+void vm_help()
+{
     printf("\n");
     printf("BASIC:\n");
     printf("  + load <filename> => Loads a .txt file into memory.\n");
@@ -86,35 +118,42 @@ void vm_help() {
     printf("\n");
 }
 
-void read_input(char* in) {
-    char* command = strtok(in, " ");
-    if (strcmp(command, "load") == 0) {
-        char ext[50];
-        char* f = strtok(NULL, " ");
-        strcpy(ext, FPATH);
-        strcat(ext, f);
-        vm_load(ext);
-        print_instr_split();
+void read_input(char *in)
+{
+    struct command *command = parse_command(in);
+    if (strcmp(command->name, "load") == 0)
+    {
+        char buf[MAX_COMMAND_ARG_SIZE];
+        strcpy(buf, FPATH);
+        strcat(buf, command->args);
+        vm_load(buf);
     }
-    if (strcmp(command, "exit") == 0) {
+    if (strcmp(command->name, "exit") == 0)
+    {
         vm_exit();
     }
-    if (strcmp(command, "run") == 0) {
+    if (strcmp(command->name, "run") == 0)
+    {
         vm_run_prog();
     }
-    if ((strcmp(command, "regs") == 0)) {
+    if ((strcmp(command->name, "regs") == 0))
+    {
         vm_regs();
     }
-    if ((strcmp(command, "mem") == 0)) {
-        if (strtok(NULL, " ") == NULL) {
+    if ((strcmp(command->name, "mem") == 0))
+    {
+        if (strtok(NULL, " ") == NULL)
+        {
             vm_mem();
         }
     }
-    if ((strcmp(command, "help") == 0)) {
+    if ((strcmp(command->name, "help") == 0))
+    {
         vm_help();
     }
-    else {
-        //printf("Invalid prompt, type 'help' for a list of commands.\n");
+    else
+    {
+        // printf("Invalid prompt, type 'help' for a list of commands.\n");
     }
-    
+    free(command);
 }
