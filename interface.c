@@ -118,41 +118,36 @@ void vm_help()
     printf("\n");
 }
 
-void read_input(char *in)
-{
+void read_input(char *in) {
     struct command *command = parse_command(in);
-    if (strcmp(command->name, "load") == 0)
-    {
+    if (strcmp(command->name, "load") == 0) {
         char buf[MAX_COMMAND_ARG_SIZE];
         strcpy(buf, FPATH);
         strcat(buf, command->args);
         vm_load(buf);
     }
-    if (strcmp(command->name, "exit") == 0)
-    {
+    if (strcmp(command->name, "exit") == 0) {
         vm_exit();
     }
-    if (strcmp(command->name, "run") == 0)
-    {
+    if (strcmp(command->name, "run") == 0) {
         vm_run_prog();
     }
-    if ((strcmp(command->name, "regs") == 0))
-    {
+    if ((strcmp(command->name, "regs") == 0)) {
         vm_regs();
     }
-    if ((strcmp(command->name, "mem") == 0))
-    {
+    if ((strcmp(command->name, "reset") == 0)) {
+        vm_reset();
+    }
+    if ((strcmp(command->name, "mem") == 0)) {
         if (strtok(NULL, " ") == NULL)
         {
             vm_mem();
         }
     }
-    if ((strcmp(command->name, "help") == 0))
-    {
+    if ((strcmp(command->name, "help") == 0)) {
         vm_help();
     }
-    else
-    {
+    else {
         // printf("Invalid prompt, type 'help' for a list of commands.\n");
     }
     free(command);

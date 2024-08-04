@@ -11,6 +11,9 @@
 3. CPU:
     - CURRENT: Works fine, need to reconsider the JMP instruction, maybe replace it with SCALL (System call). 
     - IDEA: Might want to add a 'RET' keyword, that returns to a specific address in memory, might be stored at a special register.
+        + Add a jump stack: 
+            - Push a return address when a jump is executed. 
+            - Pop a return address when a return is reached.
 
 4. ASSEMBLER: 
     - IDEA: Make it so you can comment inside the program. Makes it easier to understand if it is a larger program.    
@@ -38,3 +41,4 @@
     + Third byte: [ IMM ]
 
     IDEA: Add custom errors for each part of the machine.
+
