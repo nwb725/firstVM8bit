@@ -227,6 +227,7 @@ uint8_t sepperate_instructions(const char* fp) {
         // Does not use immidiate by default.
         // If set to 1 then the instruction uses an immidiate.
         iargs->has_imm = 0;
+        iargs->has_label = 0;
         // If the there is an empty line at the end of the program
         // This handles so it doesnt crash.
         if (iargs->name == NULL) {
@@ -279,6 +280,11 @@ uint8_t sepperate_instructions(const char* fp) {
         if (iargs->has_imm == 1) {
             imm_map = strtok(NULL, " ");
             p[i] = char_to_uint8(imm_map);
+        }
+
+        if (iargs->has_label == 1) {
+            char* lab = strtok(NULL, " ");
+            p[i] = stack_lookup(lab);
         }
 
         // Case it does not use an immidiate and has 2 args.

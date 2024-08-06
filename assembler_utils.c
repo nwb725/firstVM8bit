@@ -67,7 +67,8 @@ void get_upcodes(struct instr_args* iargs) {
 
     if (strcmp(instr, "JMP") == 0) {
         iargs->upcodes_4b = "1100";
-        iargs->num_args = 1;
+        iargs->num_args = 0;
+        iargs->has_label = 1;
     }
     if (strcmp(instr, "JMPZ") == 0) {
         iargs->upcodes_4b = "1101";
