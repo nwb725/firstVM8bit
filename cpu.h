@@ -17,7 +17,7 @@ struct d_instr {
     uint8_t rst2;
 };
 
-void run_program();
+void run_program(uint8_t);
 void reset_regs();
 void init_regs();
 void print_regs();

@@ -14,7 +14,7 @@ uint8_t regs[NUM_REGS];
 
 // The program counter, starts at 64 always.
 // The last 192 bytes in memory are reserved for instructions.
-int pc = PROG_START_ADDR;
+int pc;
 
 // The running flag, is only set to HALT if HLT is executed.
 // Where the machine then halts.
@@ -218,7 +218,8 @@ void execute_instructions() {
 /// First it assembles the program.txt file
 /// Then it writes it to memory
 /// The registers are then initialized to 0.
-void run_program() {
+void run_program(uint8_t entry) {
+    pc = entry;
     while (running != HALT) {
         execute_instructions();
     }

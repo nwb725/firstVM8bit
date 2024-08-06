@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include "cpu.h"
+#include "symtab.h"
 #include "memory.h"
 #include "assembler.h"
 #include "assembler_utils.h"
@@ -16,7 +17,11 @@ char instrs[MAX_INSTRUCTIONS];
 /// @brief This points to a list that holds all uint8_t values for all instructions.
 uint8_t* p;
 
-/// @brief Counts the number of instructions in a program.
+/// @brief Holds the count of number of labels. Gets initialized in sepperate_instructions.
+int l_count;
+
+/// @brief Counts the number of instructions in a program. 
+/// @attention MUST BE CALLED AFTER initialize_symtab!
 /// @param fp The program file.
 /// @return Returns the number of instructions.
 int count_instructions(const char *fp) {
@@ -41,6 +46,7 @@ int count_instructions(const char *fp) {
     }
 
     fclose(file);
+
     return lines;
 
 }
@@ -128,9 +134,44 @@ uint8_t char_to_uint8(char* imm) {
     return r;
 }
 
+char* is_label(char* in) {
+    return strtok(in, ":");
+}
+
+void initialize_symtab(char** prog, int n) {
+    stack_init();
+    int exists;
+    char* name;
+
+    for (int i = 0; i < n; i++) {
+        // Allocate memory for t, including space for the null terminator
+        char* t = malloc(strlen(prog[i]) + 1);
+        strcpy(t, prog[i]); // Use strcpy to copy including the null terminator
+
+        name = strtok(prog[i], ":");
+
+        // Check if name does not contain the original string including ':'
+        if (name != NULL && strcmp(name, t) != 0) {
+            prog[i] = NULL;
+            exists = stack_lookup(name);
+
+            if (exists == 0) {
+                struct f_label* f = malloc(sizeof(struct f_label));
+                f->name = name; // Duplicate the name string for safe storage
+                f->addr = 2*i + PROG_START_ADDR;
+                printf("ADDRESSSS: %d\n", f->addr);
+                stack_push(f);
+                free(f);
+            }
+        }
+
+        free(t); // Free allocated memory for t
+    }
+}
+
 /// @brief Sepperates each instruction by: NAME R1 RST2, so that they can me mapped.
 /// Then uses instr_to_uint_8b to convert the split instruction into a uint.
-void sepperate_instructions(const char* fp) {
+uint8_t sepperate_instructions(const char* fp) {
     int num_instructions = count_instructions(fp);
     if (num_instructions <= 0) {
         printf("Number of instructions is less then or equal 0: %d\n", num_instructions);
@@ -145,11 +186,20 @@ void sepperate_instructions(const char* fp) {
     for (int i = 1; i < num_instructions; i++) {
         temp[i] = strtok(NULL, "\n");
     }
+    
+    //printf("%s\n", temp[0]);
+    // Initialized the symbol tab with all labels and their addresses.
+    initialize_symtab(temp, num_instructions);
+    uint8_t start_addr = stack_lookup(PROGRAM_ENTRY_POINT);
+    l_count = stack_count();
+    printf("LC IN SEPPP: %d\n", num_instructions);
 
     // NEEDS EXPLANATION!
     int curr = 0;
-    for (int i = 0; i < num_instructions*2; i++) {
-
+    for (int i = 0; i < num_instructions*2 - l_count; i++) {
+        if (curr >= num_instructions) {
+            return start_addr;
+        }
         char* imm_map;
 
         // Holds the binary sequences of an instruction.
@@ -165,12 +215,15 @@ void sepperate_instructions(const char* fp) {
         // Num_args: Number of arguments for the current instruction.
         struct instr_args* iargs = malloc(sizeof(struct instr_args));
         assert(iargs != NULL);
-
+        // If it is a label, then look at next instruction.
+        if (temp[curr] == NULL) {
+            curr++;
+        }
+        printf("CURR: %s\n", temp[curr]);
         // Gets upcode 1 and 2 that matches the name of the instruction.
         // Saves it in iargs.
         iargs->name = strtok(temp[curr], " ");
         curr++;
-
         // Does not use immidiate by default.
         // If set to 1 then the instruction uses an immidiate.
         iargs->has_imm = 0;
@@ -180,7 +233,7 @@ void sepperate_instructions(const char* fp) {
             printf("Null instruction, most likely empty line.\n");
             free(res);
             free(iargs);
-            return;
+            return UINT8_MAX;
         }
         get_upcodes(iargs);
         switch (iargs->num_args) {
@@ -218,6 +271,7 @@ void sepperate_instructions(const char* fp) {
         // Gets the integer value of the first 8bits of the instruction
         // and stores it in p.
         uint8_t fst_int_val = binary_to_uint_8b(res);
+        printf("%d\n", fst_int_val);
         p[i] = fst_int_val;
         i++;
 
@@ -236,6 +290,8 @@ void sepperate_instructions(const char* fp) {
         free(res);
         free(iargs);
     }
+    stack_destroy();
+    return start_addr;
 
 }
 
@@ -252,19 +308,22 @@ void print_instr_split() {
 
 /// @brief Initializes memory, reads and parses the program
 /// and writes the program to memory.
-void get_program(const char* fp) {
+uint8_t get_program(const char* fp) {
     int cnt = count_instructions(fp);
     init_memory();
 
     p = malloc(sizeof(uint8_t) * 2 * cnt);
 
-    sepperate_instructions(fp);
-    for (int i = 0; i < cnt*2 - 1; i++) {
+    uint8_t s = sepperate_instructions(fp);
+    printf("LC IN GET: %d\n", cnt);
+    for (int i = 0; i < (cnt - l_count)*2 - 1; i++) {
+        printf("I: %d\n", i);
         write_memory(PROG_START_ADDR + i, p[i]);
     }
-
-    // print_memory();
+    printf("ENTRU: %d\n", s);
     free(p);
+    stack_print();
+    return s;
 }
 
 
