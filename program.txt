@@ -1,5 +1,7 @@
+FUN:
 LDI r2 2
 ADD r2 r0
 MAIN:
 LDI r1 1
+JMP FUN
 HLT

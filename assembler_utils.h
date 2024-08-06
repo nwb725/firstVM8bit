@@ -11,6 +11,8 @@ struct instr_args {
     int num_args;
     // 0 if it does not use immidiate and 1 if it does.
     int has_imm;
+    // 0 if it does not use a label and 1 if it does.
+    int has_label;
 };
 
 void get_upcodes(struct instr_args* iargs);

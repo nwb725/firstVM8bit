@@ -173,12 +173,13 @@ void execute_instructions() {
     // Subtracting one from jumps since pc gets updated anyway.
     case 0x3:
         switch (d_curr_instr->upcode2) {
-        // JMP - Jumps to value at r1.
+        // JMP - Jumps address stored in rst2.
+        // rst2 is a label, that is mapped to an address in the assembler.
         // Might need to rethink the logic here...
         case 0x0:
-            printf("JMP r%d\n", r1);
+            printf("JMP %d\n", rst2);
             // Keeps only the last 4 bits for jumping addr.
-            pc = regs[r1] + PROG_START_ADDR - 1;
+            pc = rst2 - 1;
             break;
         // JMPZ - Jumps to addr rst2 only if value in r1 is zero.
         case 0x1:
