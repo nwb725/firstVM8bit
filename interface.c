@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "assembler.h"
 #include "interface.h"
+#include "symtab.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -27,6 +28,8 @@
 //
 //        MORE ADVANCED:
 //      - trace <on | off> => Traces and logs the program.
+
+uint8_t entry = PROG_START_ADDR;
 
 /// @brief Parses the user input.
 struct command *parse_command(char *in)
@@ -66,20 +69,23 @@ void vm_reset()
 void vm_load(char *fname)
 {
     read_program_file(fname);
-    get_program(fname);
+    entry = get_program(fname);
     printf("Program from '%s' successfully written to memory!\n", fname);
 }
 
 /// @brief Executes the program that is stored in memory.
 void vm_run_prog()
 {
-    run_program();
+    run_program(entry);
 }
 
 /// @brief Terminates the VM.
 void vm_exit()
 {
     /// TODO: Sets state->exit = TRUE, runs cleanup.
+    vm_cleanup();
+    exit(EXIT_SUCCESS);
+    
 }
 
 /// @brief Prints all registers and their values.
