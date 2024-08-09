@@ -84,6 +84,11 @@ void get_upcodes(struct instr_args* iargs) {
         iargs->upcodes_4b = "1111";
         iargs->num_args = 0;
     }
+    // RET is always 0x0 and 0x0, since LDI can never load to r0.
+    if (strcmp(instr, "RET") == 0) {
+        iargs->upcodes_4b = "0000";
+        iargs->num_args = 0;
+    }
     // Needs to be handled and error if the instruction name does not exist.
 }
 
