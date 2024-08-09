@@ -40,8 +40,7 @@ struct command *parse_command(char *in)
 
     c->name = c_name;
 
-    if (c_arg == NULL)
-    {
+    if (c_arg == NULL) {
         return c;
     }
 
@@ -52,36 +51,32 @@ struct command *parse_command(char *in)
     exit(EXIT_FAILURE);
 }
 
-void vm_cleanup()
-{
+void vm_cleanup() {
     /// TODO: Should clean up allocations.
 }
 
 /// @brief Resets the virtual machine to initial state.
-void vm_reset()
-{
+void vm_reset() {
     reset_memory();
     reset_regs();
 }
 
 /// @brief Loads a .txt file into memory.
 /// @param fname Name of file to load into memory.
-void vm_load(char *fname)
-{
+void vm_load(char *fname) {
     read_program_file(fname);
     entry = get_program(fname);
+    stack_print();
     printf("Program from '%s' successfully written to memory!\n", fname);
 }
 
 /// @brief Executes the program that is stored in memory.
-void vm_run_prog()
-{
+void vm_run_prog() {
     run_program(entry);
 }
 
 /// @brief Terminates the VM.
-void vm_exit()
-{
+void vm_exit() {
     /// TODO: Sets state->exit = TRUE, runs cleanup.
     vm_cleanup();
     exit(EXIT_SUCCESS);
@@ -89,20 +84,17 @@ void vm_exit()
 }
 
 /// @brief Prints all registers and their values.
-void vm_regs()
-{
+void vm_regs() {
     print_regs();
 }
 
 /// @brief Prints memory.
-void vm_mem()
-{
+void vm_mem() {
     print_memory();
 }
 
 /// @brief Gives the user a list of commands.
-void vm_help()
-{
+void vm_help() {
     printf("\n");
     printf("BASIC:\n");
     printf("  + load <filename> => Loads a .txt file into memory.\n");

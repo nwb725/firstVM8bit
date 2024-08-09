@@ -157,9 +157,8 @@ void initialize_symtab(char** prog, int n) {
 
             if (exists == 0) {
                 struct f_label* f = malloc(sizeof(struct f_label));
-                f->name = name; // Duplicate the name string for safe storage
-                f->addr = 2*i + PROG_START_ADDR;
-                printf("ADDRESSSS: %d\n", f->addr);
+                f->name = name;
+                f->addr = 2*i + PROG_START_ADDR - 2*stack_count();
                 stack_push(f);
                 free(f);
             }
@@ -190,9 +189,9 @@ uint8_t sepperate_instructions(const char* fp) {
     //printf("%s\n", temp[0]);
     // Initialized the symbol tab with all labels and their addresses.
     initialize_symtab(temp, num_instructions);
-    uint8_t start_addr = stack_lookup(PROGRAM_ENTRY_POINT);
     l_count = stack_count();
-    printf("LC IN SEPPP: %d\n", num_instructions);
+    uint8_t start_addr = stack_lookup(PROGRAM_ENTRY_POINT);
+    stack_rmv_main();
 
     // NEEDS EXPLANATION!
     int curr = 0;
@@ -219,7 +218,6 @@ uint8_t sepperate_instructions(const char* fp) {
         if (temp[curr] == NULL) {
             curr++;
         }
-        printf("CURR: %s\n", temp[curr]);
         // Gets upcode 1 and 2 that matches the name of the instruction.
         // Saves it in iargs.
         iargs->name = strtok(temp[curr], " ");
@@ -238,7 +236,7 @@ uint8_t sepperate_instructions(const char* fp) {
         }
         get_upcodes(iargs);
         switch (iargs->num_args) {
-        // Only HLT has 0 args.
+        // HLT and RET.
         case 0:
             res->name = iargs->upcodes_4b;
             res->r1 = DEFAULT_REG_VAL;
@@ -272,19 +270,24 @@ uint8_t sepperate_instructions(const char* fp) {
         // Gets the integer value of the first 8bits of the instruction
         // and stores it in p.
         uint8_t fst_int_val = binary_to_uint_8b(res);
-        printf("%d\n", fst_int_val);
         p[i] = fst_int_val;
         i++;
-
+/* 
+        if (iargs->num_args == 0) {
+            p[i] = 0;
+        }
+ */
         // Case it uses an immidiate.
         if (iargs->has_imm == 1) {
             imm_map = strtok(NULL, " ");
             p[i] = char_to_uint8(imm_map);
         }
 
+        // Only jump.
         if (iargs->has_label == 1) {
             char* lab = strtok(NULL, " ");
             p[i] = stack_lookup(lab);
+            stack_add_return(i + PROG_START_ADDR + 1, lab);
         }
 
         // Case it does not use an immidiate and has 2 args.
@@ -296,16 +299,9 @@ uint8_t sepperate_instructions(const char* fp) {
         free(res);
         free(iargs);
     }
-    stack_destroy();
     return start_addr;
 
 }
-
-/// @brief Prints all instructions as strings.
-void print_instr_split() {
-    printf("%s\n", instrs);
-}
-
 
 // Initializes memory and 
 // writes the program instructions as uints to memory.
@@ -321,14 +317,10 @@ uint8_t get_program(const char* fp) {
     p = malloc(sizeof(uint8_t) * 2 * cnt);
 
     uint8_t s = sepperate_instructions(fp);
-    printf("LC IN GET: %d\n", cnt);
     for (int i = 0; i < (cnt - l_count)*2 - 1; i++) {
-        printf("I: %d\n", i);
         write_memory(PROG_START_ADDR + i, p[i]);
     }
-    printf("ENTRU: %d\n", s);
     free(p);
-    stack_print();
     return s;
 }
 

@@ -5,6 +5,7 @@
 #include "cpu.h"
 #include "memory.h"
 #include "assembler.h"
+#include "symtab.h"
 
 
 // 'regs' is the array of registers i will have 15 registers.
@@ -92,7 +93,14 @@ void execute_instructions() {
     case 0x0:
         switch (d_curr_instr->upcode2) {
         // LDI - Load immidiate rst2 into r1.
+        // RET - Pops from the return stack.
         case 0x0:
+            if (r1 == 0) {
+                uint8_t addr = stack_pop();
+                printf("RET <%d>\n", addr);
+                pc = addr - 1;
+                break;
+            }
             printf("LDI r%d %d\n", r1, rst2);
             regs[r1] = rst2;
             break;
@@ -224,4 +232,5 @@ void run_program(uint8_t entry) {
     while (running != HALT) {
         execute_instructions();
     }
+    stack_destroy();
 }

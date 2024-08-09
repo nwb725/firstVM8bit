@@ -3,6 +3,13 @@
 #include <string.h>
 #include "symtab.h"
 
+/// IMPORTANT! <FIXED>
+/// The stack logic is not working, the returns are opposite? 
+/// Need to look at how the RET is working.
+
+/// The order in which the labels are written, jumped to at returned from matter.
+/// If the labels are added as: L1 -> L2 -> L3:
+/// Then the call order must be L3 -> L2 -> L1.
 
 struct f_label* stack[MAX_STACK_SIZE];
 int stack_ptr = 0;
@@ -14,13 +21,25 @@ void stack_init() {
     }
 }
 
-/// @brief Pops an item off the stack and returns that item.
-struct f_label* stack_pop() {
+/// @brief Pops an item off the stack and returns that items call address.
+uint8_t stack_pop() {
     if (stack_ptr == 0) {
         printf("Cant pop from an empty stack.\n");
         exit(EXIT_FAILURE);
     }
-    return stack[--stack_ptr];
+    return stack[--stack_ptr]->r_addr;
+}
+
+/// @brief Adds a return address to a label.
+/// @param addr The return address to add.
+/// @param name The label which the return should be added to.
+void stack_add_return(uint8_t addr, char* name) {
+    for (int i = 0; i < stack_ptr; i++) {
+        if (strcmp(stack[i]->name, name) == 0) {
+            stack[i]->r_addr = addr;
+            break;
+        }
+    }
 }
 
 /// @brief Pushes an item on to the stack. Only works if stack is not full.
@@ -47,13 +66,31 @@ void stack_destroy() {
     }
 }
 
+/// @brief Removing the MAIN label from the label stack. 
+/// Finds where in the stack NAME is, removes it and moves everything down.
+void stack_rmv_main() {
+    int indx;
+    for (int i = 0; i < stack_ptr; i++) {
+        if (strcmp(stack[i]->name, "MAIN") == 0) {
+            indx = i;
+            break;
+        }
+    }
+
+    for (int i = indx; i < stack_ptr - 1; i++) {
+        stack[i]->name = stack[i+1]->name;
+        stack[i]->addr = stack[i+1]->addr;
+    }
+
+    stack_ptr--;
+}
+
 /// @brief Looks up a function name in the symtab.
 /// @param name The name of the function label.
-/// @return Returns the address of the function on success, returns -1 if the symtab does not contain the label.
+/// @return Returns the address of the function on success, returns 0 if the symtab does not contain the label.
 uint8_t stack_lookup(char* name) {
     for (int i = 0; i < stack_ptr; i++) {
         if (strcmp(name, stack[i]->name) == 0) {
-            printf("LOOKUP\n");
             return stack[i]->addr;
         }
     }
@@ -69,6 +106,6 @@ int stack_count() {
 /// @brief Prints the content of the stack
 void stack_print() {
     for (int i = 0; i < stack_ptr; i++) {
-        printf("Index: %d, Name: %s, Addr: %d\n", i, stack[i]->name, stack[i]->addr);
+        printf("Index: %d, Name: %s, Addr: %d, r_Addr: %d\n", i, stack[i]->name, stack[i]->addr, stack[i]->r_addr);
     }
 }
