@@ -51,6 +51,12 @@ struct command *parse_command(char *in)
     exit(EXIT_FAILURE);
 }
 
+void p_vm_init() {
+    init_regs();
+    init_memory();
+}
+
+
 void vm_cleanup() {
     /// TODO: Should clean up allocations.
 }
@@ -149,4 +155,20 @@ void read_input(char *in) {
         // printf("Invalid prompt, type 'help' for a list of commands.\n");
     }
     free(command);
+}
+
+void vm_run() {
+    p_vm_init();
+    vm_help();
+    while (1) {
+        printf("Type command or 'exit' to quit: ");
+        char c[50];
+        fgets(c, sizeof(c), stdin);
+        size_t len = strlen(c);
+        if (len > 0 && c[len - 1] == '\n')
+        {
+            c[len - 1] = '\0';
+        }
+        read_input(c);
+    }
 }

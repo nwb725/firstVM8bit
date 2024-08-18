@@ -138,6 +138,8 @@ char* is_label(char* in) {
     return strtok(in, ":");
 }
 
+
+// TODO: Make sure to init and build symtack (Call stack) correcly! (Read TODO).
 void initialize_symtab(char** prog, int n) {
     stack_init();
     int exists;
@@ -154,7 +156,11 @@ void initialize_symtab(char** prog, int n) {
         if (name != NULL && strcmp(name, t) != 0) {
             prog[i] = NULL;
             exists = stack_lookup(name);
-
+            
+            if (exists == 1) {
+                printf("Label: '%s' declared twice at line: %d\n.", name, i);
+                exit(EXIT_FAILURE);
+            }
             if (exists == 0) {
                 struct f_label* f = malloc(sizeof(struct f_label));
                 f->name = name;

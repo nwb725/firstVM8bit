@@ -7,26 +7,19 @@
 #define EMPTY 0
 #define MAX_COMMAND_ARG_SIZE 200
 
-struct command
-{
+struct command {
     char *name;
     char *args;
 };
 
-typedef enum
-{
-    FILE_TYPE,
-    CONFIG_TYPE
-} c_arg_type;
 
 /// TODO: Finish, the idea is to keep track of the state of the vm.
-struct state
-{
+struct state {
     int mem_empty;
     int tracing;
     int exit;
 };
 
 void read_input(char *in);
-
+void vm_run();
 #endif
